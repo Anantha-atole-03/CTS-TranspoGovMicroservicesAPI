@@ -58,7 +58,6 @@ public class TicketServiceImpl implements ITicketService {
 		log.info("Fetching all tickets for CitizenId: {}", citizenId);
 
 		ResponseEntity<CitizenResponse> response = citizenFeignClient.getCitizenById(citizenId);
-
 		if (!response.getStatusCode().equals(HttpStatus.OK)) {
 			log.error("Citizen not found with id ticket service: {}", citizenId);
 			throw new CitizenNotFoundException("Citizen account found with user");
