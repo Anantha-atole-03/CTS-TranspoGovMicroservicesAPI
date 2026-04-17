@@ -1,103 +1,73 @@
 package com.cts.transport_gov.route_schedule_service.services;
 
+import com.cts.transport_gov.route_schedule_service.dtos.*;
+import com.cts.transport_gov.route_schedule_service.exceptions.*;
+import com.cts.transport_gov.route_schedule_service.models.*;
+import com.cts.transport_gov.route_schedule_service.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
-
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import com.cts.transport_gov.route_schedule_service.dtos.ScheduleCreateRequest;
-import com.cts.transport_gov.route_schedule_service.dtos.ScheduleResponse;
-import com.cts.transport_gov.route_schedule_service.dtos.ScheduleUpdateRequest;
-import com.cts.transport_gov.route_schedule_service.exceptions.RouteNotFoundException;
-import com.cts.transport_gov.route_schedule_service.exceptions.ScheduleNotFoundException;
-import com.cts.transport_gov.route_schedule_service.models.Route;
-import com.cts.transport_gov.route_schedule_service.models.Schedule;
-import com.cts.transport_gov.route_schedule_service.repository.RouteRepository;
-import com.cts.transport_gov.route_schedule_service.repository.ScheduleRepository;
-
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-
-//Service implementation for managing Schedules.
-// Handles business logic and interacts with the repository layer.
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ScheduleServiceImpl implements IScheduleService {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScheduleServiceImpl.class);
+    private final ScheduleRepository scheduleRepository;
+    private final RouteRepository routeRepository;
+    private final ModelMapper modelMapper;
 
-	private final ScheduleRepository scheduleRepository;
-	private final RouteRepository routeRepository;
-	private final ModelMapper modelMapper;
+    @Override
+    public ScheduleResponse addSchedule(Long routeId, ScheduleCreateRequest request) {
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new RouteNotFoundException("Route ID " + routeId + " not found"));
 
-	@Override
-	public ScheduleResponse addSchedule(Long routeId, ScheduleCreateRequest scheduleRequest) {
-		logger.info("Adding schedule for routeId: {}", routeId);
-		Route route = routeRepository.findById(routeId)
-				.orElseThrow(() -> new RouteNotFoundException("Route not found with id: " + routeId));
+        if (request.getDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Schedule date cannot be in the past.");
+        }
 
-		// Validation: prevent past dates
-		if (scheduleRequest.getDate().isBefore(LocalDate.now())) {
-			throw new IllegalArgumentException("Schedule date cannot be in the past.");
-		}
-		Schedule schedule = modelMapper.map(scheduleRequest, Schedule.class);
-		schedule.setRoute(route);
+        Schedule schedule = modelMapper.map(request, Schedule.class);
+        schedule.setRoute(route); // Manually link the route entity
+        
+        Schedule saved = scheduleRepository.save(schedule);
+        return modelMapper.map(saved, ScheduleResponse.class);
+    }
 
-		Schedule saved = scheduleRepository.save(schedule);
-		logger.info("Schedule added successfully with id: {}", saved.getScheduleId());
-		ScheduleResponse response = modelMapper.map(saved, ScheduleResponse.class);
-		response.setRouteId(saved.getRoute().getRouteId());
-		return response;
-	}
+    @Override
+    public ScheduleResponse updateSchedule(Long id, ScheduleUpdateRequest request) {
+        Schedule existing = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ScheduleNotFoundException("Schedule ID " + id + " not found"));
+        
+        if (request.getDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Updated date cannot be in the past.");
+        }
 
-	@Override
-	public ScheduleResponse updateSchedule(Long id, ScheduleUpdateRequest scheduleRequest) {
-		logger.info("Updating schedule with id: {}", id);
-		Schedule existing = scheduleRepository.findById(id)
-				.orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id: " + id));
+        existing.setDate(request.getDate());
+        existing.setTime(request.getTime());
+        existing.setStatus(request.getStatus());
+        
+        return modelMapper.map(scheduleRepository.save(existing), ScheduleResponse.class);
+    }
 
-		// Validation: prevent past dates
-		if (scheduleRequest.getDate().isBefore(LocalDate.now())) {
-			throw new IllegalArgumentException("Schedule date cannot be in the past.");
-		}
+    @Override
+    public List<ScheduleResponse> getSchedulesByRoute(Long routeId) {
+        return scheduleRepository.findByRoute_RouteId(routeId).stream()
+                .map(s -> modelMapper.map(s, ScheduleResponse.class)).toList();
+    }
 
-		existing.setDate(scheduleRequest.getDate());
-		existing.setTime(scheduleRequest.getTime());
-		existing.setStatus(scheduleRequest.getStatus());
+    @Override
+    public ScheduleResponse getScheduleById(Long id) {
+        Schedule s = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ScheduleNotFoundException("Schedule ID " + id + " not found"));
+        return modelMapper.map(s, ScheduleResponse.class);
+    }
 
-		Schedule updated = scheduleRepository.save(existing);
-		logger.info("Schedule updated successfully with id: {}", updated.getScheduleId());
-		return modelMapper.map(updated, ScheduleResponse.class);
-	}
-
-	@Override
-	public List<ScheduleResponse> getSchedulesByRoute(Long routeId) {
-		logger.info("Fetching schedules for routeId: {}", routeId);
-		return scheduleRepository.findByRoute_RouteId(routeId).stream()
-				.map(schedule -> modelMapper.map(schedule, ScheduleResponse.class)).toList();
-	}
-
-	@Override
-	public ScheduleResponse getScheduleById(Long id) {
-		logger.info("Fetching schedule with id: {}", id);
-		Schedule schedule = scheduleRepository.findById(id)
-				.orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id: " + id));
-		return modelMapper.map(schedule, ScheduleResponse.class);
-	}
-
-	@Override
-	public void deleteSchedule(Long id) {
-		logger.info("Deleting schedule with id: {}", id);
-		scheduleRepository.findById(id)
-				.orElseThrow(() -> new ScheduleNotFoundException("Schedule not found with id: " + id));
-
-		scheduleRepository.deleteById(id);
-		logger.info("Schedule deleted successfully with id: {}", id);
-		return;
-	}
+    @Override
+    public void deleteSchedule(Long id) {
+        if(!scheduleRepository.existsById(id)) throw new ScheduleNotFoundException("ID " + id + " not found");
+        scheduleRepository.deleteById(id);
+    }
 }

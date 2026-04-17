@@ -1,5 +1,7 @@
 package com.cts.transport_gov.route_schedule_service;
 
+import com.cts.transport_gov.route_schedule_service.dtos.ScheduleResponse;
+import com.cts.transport_gov.route_schedule_service.models.Schedule;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -10,17 +12,26 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class RouteScheduleServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(RouteScheduleServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(RouteScheduleServiceApplication.class, args);
+    }
 
-	@Bean
-	ModelMapper modelMapper() {
-		ModelMapper mapper = new ModelMapper();
-		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT)
-				.setPropertyCondition(Conditions.isNotNull());
+    @Bean
+    public ModelMapper modelMapper() {
+        ModelMapper mapper = new ModelMapper();
+        
+        // 1. Set configuration for strict matching to avoid accidental wrong mappings
+        mapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT)
+                .setPropertyCondition(Conditions.isNotNull());
 
-		return mapper;
-	}
+        // 2. CRITICAL FIX for the "Null" Issue:
+        // This tells the mapper: "When going from Schedule to ScheduleResponse, 
+        // look inside the Route object and take the RouteId."
+        mapper.typeMap(Schedule.class, ScheduleResponse.class).addMappings(m -> {
+            m.map(src -> src.getRoute().getRouteId(), ScheduleResponse::setRouteId);
+        });
 
+        return mapper;
+    }
 }
