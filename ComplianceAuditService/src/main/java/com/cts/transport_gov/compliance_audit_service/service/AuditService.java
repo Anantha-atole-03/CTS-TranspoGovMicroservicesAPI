@@ -74,7 +74,7 @@ public class AuditService implements IAuditService {
 		Audit audit = modelMapper.map(req, Audit.class);
 
 		// ✅ Explicit business logic
-		audit.setOfficer(officer.getBody().getUserId());// store ONLY the ID (best practice)
+		audit.setOfficer_id(officer.getBody().getUserId());// store ONLY the ID (best practice)
 		audit.setStatus(AuditStatus.OPEN);
 		audit.setStartedAt(LocalDateTime.now());
 
