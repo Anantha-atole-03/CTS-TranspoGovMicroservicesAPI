@@ -77,6 +77,7 @@ public class TicketServiceImpl implements ITicketService {
 	 * Validates and confirms a ticket based on its current status.
 	 */
 	@Override
+
 	public String checkTicket(Long ticketId) {
 
 		log.info("Checking ticket status for TicketId: {}", ticketId);
@@ -134,6 +135,7 @@ public class TicketServiceImpl implements ITicketService {
 	 * Books a new ticket for a citizen. Initial ticket status is set to
 	 * PENDING_PAYMENT.
 	 */
+
 	@Override
 	public TicketResponse bookTicket(TicketCreateRequest ticketCreateRequest) {
 
@@ -142,6 +144,7 @@ public class TicketServiceImpl implements ITicketService {
 		// Validate citizen
 		ResponseEntity<CitizenResponse> response = citizenFeignClient
 				.getCitizenById(ticketCreateRequest.getCitizenId());
+		log.info(response + " InTicketService");
 		if (!response.getStatusCode().equals(HttpStatus.OK)) {
 			log.error("Citizen not found with id ticket service: {}", ticketCreateRequest.getCitizenId());
 			throw new CitizenNotFoundException("Citizen account found with user");
@@ -222,9 +225,22 @@ public class TicketServiceImpl implements ITicketService {
 		paymentRepository.save(payment);
 
 		ticket.setStatus(TicketStatus.CONFIRMED);
+		ResponseEntity<CitizenResponse> response = citizenFeignClient.getCitizenById(ticket.getCitizen());
+		if (!response.getStatusCode().equals(HttpStatus.OK)) {
+			log.error("Citizen not found with id ticket service: {}", ticket.getCitizen());
+			throw new CitizenNotFoundException("Citizen account found with user");
+		}
 		ticketRepository.save(ticket);
 
 		log.info("Payment successful for TicketId: {}", ticketId);
+//		if (ticket.getCitizen().getEmail() != null) {
+//			String info = String.format(
+//					"Title: %s <br> Route : %d <br> Start from: %s <br> End Stop: %s <br> Time: %s <br> <b>Payment Status:</b> %s <br>Payment successful <br> Transaction Id:%d <br> Amount:%f",
+//					ticket.getRoute().getTitle(), ticket.getRoute(), ticket.getRoute().getStartPoint(),
+//					ticket.getRoute().getEndPoint(), ticket.getDate().toString(), ticket.getStatus().toString(),
+//					payment.getPaymentId(), ticket.getFareAmount());
+//			notificationService.sendTicketNotification(response.getEmail(), info, ticket.getTicketId());
+//		}
 
 		return "Payment successful. Ticket confirmed.";
 	}
@@ -233,4 +249,5 @@ public class TicketServiceImpl implements ITicketService {
 	public long countTickets() {
 		return ticketRepository.count();
 	}
+
 }

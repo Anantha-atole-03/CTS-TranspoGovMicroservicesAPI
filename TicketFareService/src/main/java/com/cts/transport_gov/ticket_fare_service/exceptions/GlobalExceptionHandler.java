@@ -20,6 +20,14 @@ public class GlobalExceptionHandler {
 				.body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
 	}
 
+	@ExceptionHandler(ServiceUnavailableException.class)
+	public ResponseEntity<ExceptionResponse> handleTicketStatusException(ServiceUnavailableException e) {
+		log.error(e.getClass() + " : " + e.getMessage());
+
+		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+				.body(new ExceptionResponse(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE.value()));
+	}
+
 	@ExceptionHandler(TicketNotFoundException.class)
 	public ResponseEntity<ExceptionResponse> handleTicketNotFoundException(TicketNotFoundException e) {
 		log.error(e.getClass() + " : " + e.getMessage());
