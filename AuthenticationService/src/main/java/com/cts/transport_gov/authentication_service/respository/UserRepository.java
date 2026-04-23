@@ -10,4 +10,8 @@ import com.cts.transport_gov.authentication_service.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByPhone(String phone);
+
+	Optional<User> findByEmail(String email);
+	// void forgotPassword(ForgotPasswordRequest request);
+
 }

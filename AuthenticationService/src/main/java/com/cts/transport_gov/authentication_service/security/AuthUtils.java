@@ -23,6 +23,7 @@ import io.jsonwebtoken.security.Keys;
  * services.
  */
 @Component
+
 public class AuthUtils {
 
 	@Value("${jwt.secret}")
@@ -45,6 +46,7 @@ public class AuthUtils {
 	 * @throws IllegalArgumentException If the userDetails type is not User or
 	 *                                  Citizen.
 	 */
+
 	public String generateAccessToken(UserDetails userDetails) {
 
 		String phone;
@@ -72,6 +74,7 @@ public class AuthUtils {
 		 * claim("id"): Stores the database primary key. - claim("role"): Stores the
 		 * user's authorization level. - setExpiration: Valid for 5 hours.
 		 */
+
 		return Jwts.builder().subject(phone).claim("id", id).claim("role", role).issuedAt(new Date())
 				.expiration(new Date(System.currentTimeMillis() + (5 * 60 * 60 * 1000))).signWith(getSecretKey())
 				.compact();

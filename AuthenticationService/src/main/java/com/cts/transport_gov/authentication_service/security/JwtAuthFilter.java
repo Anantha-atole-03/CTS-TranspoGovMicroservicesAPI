@@ -49,6 +49,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		try {
 			log.info("Incoming request: {}", request.getRequestURI());
 
+			// check request comming through gateway only
+			if (!"gateway".equals(request.getHeader("X-Internal-Secret"))) {
+				log.info("internal secret:{}", request.getHeader("X-Internal-Secret"));
+				if (!request.getRequestURI().startsWith("/auth")) {
+					log.info("forbidden request");
+					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
+			}
 			// 1. Extract the Authorization header from the request
 			final String authHeader = request.getHeader("Authorization");
 

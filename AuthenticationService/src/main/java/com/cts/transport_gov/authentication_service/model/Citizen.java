@@ -45,10 +45,20 @@ public class Citizen implements UserDetails {
 	private LocalDate dob;
 	private String gender;
 	private String address;
-	@Column(name = "contact_info", columnDefinition = "text")
+	@Column(name = "contact_info", columnDefinition = "text", unique = true)
 	private String phone;
+	private String email;
 	private String password;
+	@Enumerated(EnumType.STRING)
 	private UserRole role;
+
+	@Enumerated(EnumType.STRING)
+	private CitizenStatus status;
+
+	@CreationTimestamp
+	private LocalDateTime createdAt;
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -59,12 +69,4 @@ public class Citizen implements UserDetails {
 	public String getUsername() {
 		return phone;
 	}
-
-	@Enumerated(EnumType.STRING)
-	private CitizenStatus status;
-
-	@CreationTimestamp
-	private LocalDateTime createdAt;
-	@UpdateTimestamp
-	private LocalDateTime updatedAt;
 }
