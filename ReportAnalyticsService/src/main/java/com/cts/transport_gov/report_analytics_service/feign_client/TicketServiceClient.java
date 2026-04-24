@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @FeignClient(name = "TicketFareService")
 public interface TicketServiceClient {
 
-	@GetMapping("/tickets/count")
+	@GetMapping("/ticket/count")
 	long countTickets();
 
 }

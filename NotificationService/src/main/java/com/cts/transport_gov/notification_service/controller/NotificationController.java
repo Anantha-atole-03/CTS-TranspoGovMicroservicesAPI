@@ -13,8 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cts.transport_gov.notification_service.dto.ComplianceNotificationRequest;
 import com.cts.transport_gov.notification_service.dto.NotificationCreateRequest;
 import com.cts.transport_gov.notification_service.dto.NotificationResponse;
+import com.cts.transport_gov.notification_service.dto.OtpNotificationRequest;
+import com.cts.transport_gov.notification_service.dto.ProgramNotificationRequest;
+import com.cts.transport_gov.notification_service.dto.RouteNotificationRequest;
+import com.cts.transport_gov.notification_service.dto.TicketNotificationRequest;
 import com.cts.transport_gov.notification_service.service.INotificationService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -87,4 +92,45 @@ public class NotificationController {
 
 		return ResponseEntity.ok("All System Notifications Sent Successfully");
 	}
+
+	@PostMapping("/ticket")
+	public ResponseEntity<String> sendTicketNotification(@RequestBody TicketNotificationRequest request) {
+
+		notificationService.sendTicketNotification(request.getEmail(), request.getRoute(), request.getTicketId());
+
+		return ResponseEntity.ok("Ticket notification sent");
+	}
+
+	@PostMapping("/program")
+	public ResponseEntity<String> sendProgramNotification(@RequestBody ProgramNotificationRequest request) {
+
+		notificationService.sendProgramNotification(request.getEmail(), request.getTitle(), request.getDescription());
+
+		return ResponseEntity.ok("Program notification sent");
+	}
+
+	@PostMapping("/route")
+	public ResponseEntity<String> sendRouteNotification(@RequestBody RouteNotificationRequest request) {
+
+		notificationService.sendRouteUpdateNotification(request.getEmail(), request.getRoute());
+
+		return ResponseEntity.ok("Route update notification sent");
+	}
+
+	@PostMapping("/compliance")
+	public ResponseEntity<String> sendComplianceNotification(@RequestBody ComplianceNotificationRequest request) {
+
+		notificationService.sendComplianceNotification(request.getEmail(), request.getEntity());
+
+		return ResponseEntity.ok("Compliance notification sent");
+	}
+
+	@PostMapping("/otp")
+	public ResponseEntity<String> sendOtpNotification(@RequestBody OtpNotificationRequest request) {
+
+		notificationService.sendOtpNotification(request.getEmail(), request.getOtp());
+
+		return ResponseEntity.ok("OTP notification sent");
+	}
+
 }

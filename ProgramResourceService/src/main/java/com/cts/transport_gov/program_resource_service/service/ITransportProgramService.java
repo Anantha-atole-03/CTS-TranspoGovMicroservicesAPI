@@ -24,5 +24,5 @@ public interface ITransportProgramService {
 
 	ProgramResponse updateProgram(Long programId, ProgramUpdateRequest updateRequest);
 
-	double calculateEfficiency();
+	int programCount();
 }

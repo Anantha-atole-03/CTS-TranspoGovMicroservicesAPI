@@ -45,15 +45,33 @@ public class ReportService implements IReportService {
 		log.info("Generating operational dashboard");
 
 		Map<String, Object> response = new HashMap<>();
+
 		try {
 			response.put("activeRoutes", routeServiceClient.countActiveRoutes());
-			response.put("totalTickets", ticketServiceClient.countTickets());
-			response.put("complianceAlerts", complianceServiceClient.getComplianceAlerts());
-			response.put("programEfficiency", programServiceClient.calculateEfficiency());
-		} catch (FeignException.NotFound ex) {
-			throw new ResourceNotFoundException("One of the dashboard APIs was not found");
 		} catch (FeignException ex) {
-			throw new ServiceUnavailableException("One or more dependent services are unavailable");
+			response.put("activeRoutes", 0); // fallback
+			log.error("Route service failed", ex);
+		}
+
+		try {
+			response.put("totalTickets", ticketServiceClient.countTickets());
+		} catch (FeignException ex) {
+			response.put("totalTickets", 0L);
+			log.error("Ticket service failed", ex);
+		}
+
+		try {
+			response.put("complianceAlerts", complianceServiceClient.getComplianceAlerts());
+		} catch (FeignException ex) {
+			response.put("complianceAlerts", 0);
+			log.error("Compliance service failed", ex);
+		}
+
+		try {
+			response.put("programEfficiency", programServiceClient.calculateEfficiency());
+		} catch (FeignException ex) {
+			response.put("programEfficiency", 0.0);
+			log.error("Program service failed", ex);
 		}
 
 		return response;
@@ -72,20 +90,24 @@ public class ReportService implements IReportService {
 
 		Map<String, Object> metrics = new HashMap<>();
 
-		metrics.put("activeRoutes", routeServiceClient.countActiveRoutes());
-		metrics.put("totalTickets", ticketServiceClient.countTickets());
-		metrics.put("complianceAlerts", complianceServiceClient.getComplianceAlerts());
-		metrics.put("programEfficiency", programServiceClient.calculateEfficiency());
-
-		String jsonMetrics;
 		try {
-			jsonMetrics = new ObjectMapper().writeValueAsString(metrics);
+			metrics.put("activeRoutes", routeServiceClient.countActiveRoutes());
+			metrics.put("totalTickets", ticketServiceClient.countTickets());
+			metrics.put("complianceAlerts", complianceServiceClient.getComplianceAlerts());
+			metrics.put("programEfficiency", programServiceClient.calculateEfficiency());
+		} catch (FeignException.NotFound ex) {
+			throw new ResourceNotFoundException("One of the dependent report APIs was not found");
+		} catch (FeignException ex) {
+			throw new ServiceUnavailableException("One or more dependent services are unavailable");
+		}
+
+		try {
+			String jsonMetrics = new ObjectMapper().writeValueAsString(metrics);
+			Report report = Report.builder().scope(scope).metrics(jsonMetrics).build();
+			return reportRepo.save(report);
 		} catch (Exception e) {
 			throw new RuntimeException("JSON conversion error");
 		}
-
-		Report report = Report.builder().scope(scope).metrics(jsonMetrics).build();
-		return reportRepo.save(report);
 	}
 
 	/*
@@ -97,8 +119,7 @@ public class ReportService implements IReportService {
 	@Override
 	public Report getReportByJobId(Long jobId) {
 		log.info("Fetching report jobId={}", jobId);
-		return reportRepo.findById(jobId).orElseThrow(() -> new RuntimeException("Report not found"));
-
+		return reportRepo.findById(jobId)
+				.orElseThrow(() -> new ResourceNotFoundException("Report not found with id: " + jobId));
 	}
-
 }

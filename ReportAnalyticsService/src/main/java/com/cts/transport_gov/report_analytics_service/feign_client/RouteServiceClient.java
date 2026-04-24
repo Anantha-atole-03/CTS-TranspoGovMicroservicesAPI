@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @FeignClient(name = "RouteScheduleService")
 public interface RouteServiceClient {
 
-	@GetMapping("/routes/count/active")
+	@GetMapping("/route/count/active")
 	int countActiveRoutes();
 
 }

@@ -14,6 +14,7 @@ import com.cts.transport_gov.notification_service.enums.NotificationCategory;
 import com.cts.transport_gov.notification_service.enums.NotificationScope;
 import com.cts.transport_gov.notification_service.enums.NotificationStatus;
 import com.cts.transport_gov.notification_service.exception.CitizenNotFoundException;
+import com.cts.transport_gov.notification_service.exception.ServiceUnavailableException;
 import com.cts.transport_gov.notification_service.exception.UserNotFoundException;
 import com.cts.transport_gov.notification_service.feign.CitizenServiceClient;
 import com.cts.transport_gov.notification_service.feign.UserServiceClient;
@@ -23,7 +24,6 @@ import com.cts.transport_gov.notification_service.utils.MailTemplates;
 
 import feign.FeignException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.ws.rs.ServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

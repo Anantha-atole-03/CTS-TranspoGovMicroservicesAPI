@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @FeignClient(name = "ProgramResourceService")
 public interface ProgramServiceClient {
 
-	@GetMapping("/programs/efficiency")
+	@GetMapping("/programs/count")
 	double calculateEfficiency();
 
 }

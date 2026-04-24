@@ -22,7 +22,7 @@ import com.cts.transport_gov.compliance_audit_service.service.ComplianceRecordSe
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/compliances")
+@RequestMapping("/compliance")
 @RequiredArgsConstructor
 public class ComplianceRecordController {
 
@@ -74,11 +74,10 @@ public class ComplianceRecordController {
 		List<ComplianceResponse> list = service.findByEntityId(entityId);
 		return ResponseEntity.ok(new ApiResponse<>("Records fetched by entityId!", HttpStatus.OK.value(), list));
 	}
-//
-//	@GetMapping("/summary")
-//	public ResponseEntity<ApiResponse<?>> getCount() {
-//		return ResponseEntity
-//				.ok(new ApiResponse<>("Count fetched!", HttpStatus.OK.value(), service.getStatusWiseCount()));
-//	}
+
+	@GetMapping("/summary")
+	public ResponseEntity<?> getCount() {
+		return ResponseEntity.ok(service.getCount());
+	}
 
 }

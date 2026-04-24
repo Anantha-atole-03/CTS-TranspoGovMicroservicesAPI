@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @FeignClient(name = "ComplianceAuditService")
 public interface ComplianceServiceClient {
 
-	@GetMapping("/compliance/alerts/count")
+	@GetMapping("/compliance/summary")
 	int getComplianceAlerts();
 
 }

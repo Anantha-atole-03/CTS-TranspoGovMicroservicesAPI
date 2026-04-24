@@ -22,7 +22,7 @@ import com.cts.transport_gov.compliance_audit_service.service.IAuditService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/audits")
+@RequestMapping("/audit")
 @RequiredArgsConstructor
 public class AuditController {
 
@@ -49,7 +49,7 @@ public class AuditController {
 	}
 
 	/* ========= GET /audits — List audits (filters, pagination) ========= */
-	@GetMapping("/audits_lists")
+	@GetMapping("/")
 	public ResponseEntity<List<AuditResponse>> findAll() {
 		List<AuditResponse> audits = auditService.findAll();
 		return ResponseEntity.ok(audits);
@@ -71,9 +71,8 @@ public class AuditController {
 
 	// GET /compliances/summary
 	@GetMapping("/summary")
-	public ResponseEntity<ApiResponse<?>> getCount() {
-		return ResponseEntity
-				.ok(new ApiResponse<>("Count fetched!", HttpStatus.OK.value(), auditService.getStatusWiseCount()));
+	public ResponseEntity<?> getCount() {
+		return ResponseEntity.ok(auditService.getStatusWiseCount());
 	}
 
 }

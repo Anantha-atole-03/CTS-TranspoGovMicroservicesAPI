@@ -1,6 +1,5 @@
 package com.cts.transport_gov.report_analytics_service.controller;
 
-
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -23,12 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/reports")
+@RequestMapping("/report")
 @Slf4j
 @RequiredArgsConstructor
 public class ReportController {
 
-	
 	private final IReportService reportService;
 
 	/*
@@ -66,11 +64,11 @@ public class ReportController {
 
 		Report report = reportService.runCustomReport(request.getScope().name());
 
-		ReportResponse response  = ReportResponse.builder().reportId(report.getReportId()).scope(request.getScope())
+		ReportResponse response = ReportResponse.builder().reportId(report.getReportId()).scope(request.getScope())
 				.metrics(report.getMetrics()).status(ReportStatus.IN_PROGRESS).generatedDate(report.getGeneratedDate())
 				.build();
 
-		 return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	/*
@@ -90,7 +88,7 @@ public class ReportController {
 
 		Report report = reportService.getReportByJobId(jobId);
 
-		ReportResponse response  = ReportResponse.builder().reportId(report.getReportId())
+		ReportResponse response = ReportResponse.builder().reportId(report.getReportId())
 				.scope(ReportScope.valueOf(report.getScope())).metrics(report.getMetrics())
 				.status(ReportStatus.COMPLETED).generatedDate(report.getGeneratedDate()).build();
 

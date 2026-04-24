@@ -45,7 +45,7 @@ public class FallbackController {
 
 	@GetMapping("/report-service-fallback")
 	public Mono<String> reportAnalyticsServiceCircuitBreaker() {
-		return Mono.just("Reportin Service is currently unavailable");
+		return Mono.just("Reporting Service is currently unavailable");
 	}
 
 	@GetMapping("/route-schedule-service-fallback")

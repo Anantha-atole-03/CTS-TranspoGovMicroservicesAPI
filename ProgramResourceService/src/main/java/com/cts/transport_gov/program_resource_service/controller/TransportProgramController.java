@@ -34,6 +34,11 @@ public class TransportProgramController {
 
 	private final ITransportProgramService programService;
 
+	@GetMapping("/count")
+	public ResponseEntity<Integer> getProgramCount() {
+		return ResponseEntity.status(HttpStatus.OK).body(programService.programCount());
+	}
+
 	/*
 	 * Method: GET Argument: N/A Description: It fetch all Programs by return:
 	 * ResponseEntity<ApiResponse> type

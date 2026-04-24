@@ -50,6 +50,12 @@ public class TicketController {
 		return ResponseEntity.ok(tickets);
 	}
 
+	@GetMapping("/count")
+	public ResponseEntity<Long> getTicketCount() {
+
+		return ResponseEntity.ok(ticketService.countTickets());
+	}
+
 	/**
 	 * Description: Get ticket details by ticket ID. URL: GET
 	 * /api/tickets/{ticketId}
@@ -110,4 +116,5 @@ public class TicketController {
 
 		return ResponseEntity.ok(ticketService.makePayment(ticketId, paymentMethod));
 	}
+
 }
