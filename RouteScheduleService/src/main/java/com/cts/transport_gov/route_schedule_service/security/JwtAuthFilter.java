@@ -38,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		try {
-			log.info("Incoming request: {}", request.getRequestURI());
+			log.info("Incoming  schedule service request: {}", request.getRequestURI());
 
 			// check request comming through gateway only
 			if (!"gateway".equals(request.getHeader("X-Internal-Secret"))) {
