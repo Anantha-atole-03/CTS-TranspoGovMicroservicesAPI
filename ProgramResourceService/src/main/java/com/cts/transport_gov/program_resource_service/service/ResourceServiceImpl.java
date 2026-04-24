@@ -13,6 +13,7 @@ import com.cts.transport_gov.program_resource_service.enums.ResourceStatus;
 import com.cts.transport_gov.program_resource_service.exception.ProgramNotFoundException;
 import com.cts.transport_gov.program_resource_service.exception.ResourceAllocationException;
 import com.cts.transport_gov.program_resource_service.exception.ResourceNotFoundException;
+import com.cts.transport_gov.program_resource_service.model.Resource;
 import com.cts.transport_gov.program_resource_service.model.TransportProgram;
 import com.cts.transport_gov.program_resource_service.respository.IResourceRepository;
 import com.cts.transport_gov.program_resource_service.respository.ITransportProgramRepository;
