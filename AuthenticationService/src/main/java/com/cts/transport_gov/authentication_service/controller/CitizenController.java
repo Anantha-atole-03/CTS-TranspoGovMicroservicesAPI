@@ -84,4 +84,5 @@ public class CitizenController {
 	public void updateRole(@RequestBody UserRole userRole, @PathVariable Long userId) {
 		userService.updateUserRoles(userRole, userId);
 	}
+
 }
