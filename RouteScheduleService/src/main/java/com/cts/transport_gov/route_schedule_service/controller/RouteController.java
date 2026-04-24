@@ -22,8 +22,8 @@ public class RouteController {
 
     @PostMapping
     public ResponseEntity<RouteResponse> createRoute(@RequestBody RouteCreateRequest route) {
-        RouteResponse created = routeService.addRoute(route);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    
+        return ResponseEntity.status(HttpStatus.CREATED).body(routeService.addRoute(route));
     }
 
     @PutMapping("/{id}")
