@@ -14,7 +14,7 @@ import com.cts.transport_gov.route_schedule_service.services.IRouteService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/route")
+@RequestMapping("/route/")
 @RequiredArgsConstructor
 public class RouteController {
 
@@ -22,8 +22,8 @@ public class RouteController {
 
     @PostMapping
     public ResponseEntity<RouteResponse> createRoute(@RequestBody RouteCreateRequest route) {
-        RouteResponse created = routeService.addRoute(route);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    
+        return ResponseEntity.status(HttpStatus.CREATED).body(routeService.addRoute(route));
     }
 
     @PutMapping("/{id}")
