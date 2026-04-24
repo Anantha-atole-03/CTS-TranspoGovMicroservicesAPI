@@ -92,9 +92,13 @@ public class ReportService implements IReportService {
 
 		try {
 			metrics.put("activeRoutes", routeServiceClient.countActiveRoutes());
+			log.info("route-work");
 			metrics.put("totalTickets", ticketServiceClient.countTickets());
+			log.info("tiket-work");
 			metrics.put("complianceAlerts", complianceServiceClient.getComplianceAlerts());
+			log.info("compliance-work");
 			metrics.put("programEfficiency", programServiceClient.calculateEfficiency());
+			log.info("program-work");
 		} catch (FeignException.NotFound ex) {
 			throw new ResourceNotFoundException("One of the dependent report APIs was not found");
 		} catch (FeignException ex) {

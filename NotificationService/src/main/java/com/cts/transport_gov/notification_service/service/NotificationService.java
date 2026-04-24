@@ -98,7 +98,7 @@ public class NotificationService implements INotificationService {
 
 		// 2️⃣ Validate citizen existence via CitizenService
 		try {
-			citizenServiceClient.getCitizenById(citizenId);
+			citizenServiceClient.getCitizen(citizenId);
 		} catch (FeignException.NotFound ex) {
 			// Citizen does not exist
 			throw new CitizenNotFoundException("Citizen not found with id: " + citizenId);
@@ -149,12 +149,14 @@ public class NotificationService implements INotificationService {
 		try {
 			userServiceClient.getUserById(request.getUserId());
 		} catch (FeignException.NotFound e) {
+			log.debug(e.getMessage());
 			throw new RuntimeException(USER_NOT_FOUND_ID);
 		}
 
 		try {
 			userServiceClient.getUserByEmail(request.getEmail());
 		} catch (FeignException.NotFound e) {
+			log.debug(e.getMessage());
 			throw new RuntimeException(USER_NOT_FOUND_EMAIL);
 		}
 
@@ -163,11 +165,11 @@ public class NotificationService implements INotificationService {
 				.build();
 
 		Notification savedNotification = notificationRepository.save(notification);
-
+		log.debug("Notification saved");
 		String emailContent = MailTemplates.getGeneralNotificationTemplate(request.getEmail(), request.getMessage());
 
 		sendEmail(request.getEmail(), "TranspoGov Notification", emailContent);
-
+		log.debug("Notification sent");
 		return modelMapper.map(savedNotification, NotificationResponse.class);
 	}
 

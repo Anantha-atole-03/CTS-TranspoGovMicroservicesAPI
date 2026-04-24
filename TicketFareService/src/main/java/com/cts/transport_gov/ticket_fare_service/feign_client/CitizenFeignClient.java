@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cts.transport_gov.ticket_fare_service.dto.CitizenResponse;
 
-@FeignClient(name = "CITIZENSERVICE", fallback = CitizenFeignFallback.class)
+@FeignClient(name = "AUTHENTICATIONSSERVICE", fallback = CitizenFeignFallback.class)
 public interface CitizenFeignClient {
 	@GetMapping("/citizen/{id}")
 	ResponseEntity<CitizenResponse> getCitizenById(@PathVariable("id") Long id);

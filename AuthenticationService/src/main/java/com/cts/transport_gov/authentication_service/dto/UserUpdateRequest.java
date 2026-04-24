@@ -1,0 +1,15 @@
+package com.cts.transport_gov.authentication_service.dto;
+
+import com.cts.transport_gov.authentication_service.enums.UserRole;
+import com.cts.transport_gov.authentication_service.enums.UserStatus;
+
+import lombok.Data;
+
+@Data
+public class UserUpdateRequest {
+	private String name;
+	private UserRole role;
+	private String email;
+	private String phone;
+	private UserStatus status;
+}

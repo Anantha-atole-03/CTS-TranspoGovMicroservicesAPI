@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping("/notification")
+@Transactional
 public class NotificationController {
 
 	private final INotificationService notificationService;
@@ -41,14 +43,14 @@ public class NotificationController {
 	 * Return:ResponseEntity<ApiResponse<List<NotificationResponse>>> type
 	 */
 	// GET /notifications?userId=123
-	@GetMapping("/user/")
+	@GetMapping("/user")
 	public ResponseEntity<List<NotificationResponse>> getUserNotifications(@RequestParam Long userId) {
 		log.info("Fetching user notifications");
 		List<NotificationResponse> notifications = notificationService.getUserNotifications(userId);
 		return ResponseEntity.ok(notifications);
 	}
 
-	@GetMapping("/citizen/")
+	@GetMapping("/citizen")
 	public ResponseEntity<List<NotificationResponse>> getCitizenNotifications(@RequestParam Long userId) {
 		log.info("Fetching user notifications");
 		List<NotificationResponse> notifications = notificationService.getCitizenNotifications(userId);

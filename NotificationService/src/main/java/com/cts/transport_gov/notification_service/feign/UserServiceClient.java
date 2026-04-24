@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cts.transport_gov.notification_service.dto.UserDTO;
 
-@FeignClient(name = "AuthenticationService")
+@FeignClient(name = "AUTHENTICATIONSERVICE")
 public interface UserServiceClient {
 
 	@GetMapping("/users/{id}")
