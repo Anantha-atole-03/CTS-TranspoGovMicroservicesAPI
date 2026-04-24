@@ -64,7 +64,7 @@ public class AuditService implements IAuditService {
 		log.info("Creating audit for officerId: {}", req.getOfficerId());
 
 		// ✅ Fetch officer via Feign client
-		ResponseEntity<UserResponse> officer = entityFeignClient.getUserById(req.getOfficerId());
+		ResponseEntity<UserResponse> officer = entityFeignClient.getuser(req.getOfficerId());
 
 		if (officer == null) {
 			throw new AuditNotFoundException("Aduit officer not found with id: " + req.getOfficerId());
