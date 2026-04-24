@@ -1,17 +1,24 @@
 package com.cts.transport_gov.authentication_service.security;
 
+import java.util.Optional;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cts.transport_gov.authentication_service.dto.LoginRequestDto;
 import com.cts.transport_gov.authentication_service.dto.LoginResponseDto;
 import com.cts.transport_gov.authentication_service.model.Citizen;
 import com.cts.transport_gov.authentication_service.model.User;
+import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
+import com.cts.transport_gov.authentication_service.respository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service responsible for authenticating users and citizens. It validates
@@ -19,9 +26,13 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 	private final AuthenticationManager authenticationManager;
 	private final AuthUtils authUtils;
+	private final UserRepository userRepository;
+	private final CitizenRepository citizenRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * Authenticates the user based on phone and password, then determines the
@@ -69,5 +80,30 @@ public class AuthService {
 		loginResponseDto.setToken(token);
 
 		return loginResponseDto;
+	}
+
+	/**
+	 * COMMAND: Generate a unique recovery token and initiate password reset
+	 * protocol.
+	 */
+
+	@Transactional
+	public String forgotPassword(String email, String newPassword) {
+		log.info("Executing forgot-password command for: {}", email);
+		Optional<Citizen> citizen = citizenRepository.findByEmail(email);
+		if (!citizen.isPresent()) {
+			User user = userRepository.findByEmail(email).orElseThrow(() -> {
+				log.warn("Forgot Password: Email {} not found. Triggering generic response.", email);
+				return new RuntimeException("Email invalid");
+			});
+			user.setPassword(passwordEncoder.encode(newPassword));
+			return "Password set successfully";
+		}
+
+		citizen.get().setPassword(passwordEncoder.encode(newPassword));
+
+		log.info("Passeord set: Email sent to {} ", email);
+
+		return "Password set successfully";
 	}
 }

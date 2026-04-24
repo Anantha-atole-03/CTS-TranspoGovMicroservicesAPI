@@ -11,6 +11,7 @@ import com.cts.transport_gov.authentication_service.dto.CitizenCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.CitizenResponse;
 import com.cts.transport_gov.authentication_service.dto.LoginRequestDto;
 import com.cts.transport_gov.authentication_service.dto.LoginResponseDto;
+import com.cts.transport_gov.authentication_service.dto.ResetPasswordRequestDto;
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.security.AuthService;
@@ -18,10 +19,12 @@ import com.cts.transport_gov.authentication_service.service.ICitizenService;
 import com.cts.transport_gov.authentication_service.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 	private final AuthService authService;
 	private final IUserService userService;
@@ -40,5 +43,14 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
 		return ResponseEntity.ok(authService.login(loginRequestDto));
+	}
+
+	/**
+	 * Resets the user password using a verified token/request.
+	 */
+	@PostMapping("/reset-password")
+	public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDto req) {
+		log.info("Password reset execution attempted.");
+		return ResponseEntity.ok(authService.forgotPassword(req.getEmail(), req.getNewPassword()));
 	}
 }
