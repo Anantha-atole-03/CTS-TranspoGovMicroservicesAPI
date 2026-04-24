@@ -61,7 +61,6 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ExceptionResponse> handleException(Exception e) {
 
-		System.out.println("" + e.getClass());
 		log.error(e.getClass() + " : " + e.getMessage() + " ");
 
 		log.error(e.getClass() + " : " + e.getMessage());

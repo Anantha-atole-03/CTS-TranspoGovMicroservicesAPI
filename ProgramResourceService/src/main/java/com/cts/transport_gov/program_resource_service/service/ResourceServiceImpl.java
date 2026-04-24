@@ -169,7 +169,7 @@ public class ResourceServiceImpl implements IResourceService {
 		// Budget Calculations
 		double allocatedBudget = program.getBudget();
 
-		double utilizedBudget = resources.stream().mapToDouble(Resource::getBudget).sum();
+		double utilizedBudget = resources.stream().mapToDouble(res -> res.getBudget()).sum();
 
 		double remainingBudget = allocatedBudget - utilizedBudget;
 
