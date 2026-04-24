@@ -43,7 +43,7 @@ public class Audit {
 	private Long id;
 
 	@Column(name = "officer_id ", nullable = false)
-	private Long officer;
+	private Long officer_id;
 
 	@Column(name = "Scope", nullable = false, length = 300)
 	private String scope;

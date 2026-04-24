@@ -47,25 +47,21 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// --- Public Endpoints ---
-			            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-			            .requestMatchers(HttpMethod.GET, "/route/**").permitAll()
-			            .requestMatchers(HttpMethod.GET, "/schedule/**").permitAll()
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/route/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/schedule/**").permitAll()
 
-			            // --- Route Endpoints ---
-			            .requestMatchers(HttpMethod.POST, "/route/**")
-			                .hasAnyRole(PROGRAM_MANAGER, COMPLIANCE_OFFICER, TRANSPORT_OFFICER)
-			            .requestMatchers(HttpMethod.PUT, "/route/**")
-			                .hasAnyRole(PROGRAM_MANAGER, TRANSPORT_OFFICER)
-			            .requestMatchers(HttpMethod.DELETE, "/route/**")
-			                .hasAnyRole(ADMINISTRATOR, PROGRAM_MANAGER)
+						// --- Route Endpoints ---
+						.requestMatchers(HttpMethod.POST, "/route/**")
+						.hasAnyRole(PROGRAM_MANAGER, COMPLIANCE_OFFICER, TRANSPORT_OFFICER)
+						.requestMatchers(HttpMethod.PUT, "/route/**").hasAnyRole(PROGRAM_MANAGER, TRANSPORT_OFFICER)
+						.requestMatchers(HttpMethod.DELETE, "/route/**").hasAnyRole(ADMINISTRATOR, PROGRAM_MANAGER)
 
-			            // --- Schedule Endpoints ---
-			            .requestMatchers(HttpMethod.POST, "/schedule/**")
-			                .hasAnyRole(PROGRAM_MANAGER, COMPLIANCE_OFFICER, TRANSPORT_OFFICER)
-			            .requestMatchers(HttpMethod.PUT, "/schedule/**")
-			                .hasAnyRole(PROGRAM_MANAGER, TRANSPORT_OFFICER)
-			            .requestMatchers(HttpMethod.DELETE, "/schedule/**")
-			                .hasAnyRole(ADMINISTRATOR, PROGRAM_MANAGER)
+						// --- Schedule Endpoints ---
+						.requestMatchers(HttpMethod.POST, "/schedule/**")
+						.hasAnyRole(PROGRAM_MANAGER, COMPLIANCE_OFFICER, TRANSPORT_OFFICER)
+						.requestMatchers(HttpMethod.PUT, "/schedule/**").hasAnyRole(PROGRAM_MANAGER, TRANSPORT_OFFICER)
+						.requestMatchers(HttpMethod.DELETE, "/schedule/**").hasAnyRole(ADMINISTRATOR, PROGRAM_MANAGER)
 
 						// All other requests must be authenticated
 						.anyRequest().authenticated())

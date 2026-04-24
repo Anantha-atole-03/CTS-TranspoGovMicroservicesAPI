@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
+import com.cts.transport_gov.authentication_service.enums.UserRole;
 import com.cts.transport_gov.authentication_service.model.User;
 import com.cts.transport_gov.authentication_service.service.IUserService;
 
@@ -23,7 +24,7 @@ import lombok.RequiredArgsConstructor;
  * REST Controller for managing User accounts and authentication details.
  * Handles user registration, profile updates, and role management.
  */
-@RequestMapping("/api/v1/users")
+@RequestMapping("/users")
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -59,8 +60,8 @@ public class UserController {
 	 */
 	@PutMapping("/{userId}")
 	public void updateUser(@RequestBody User user, @PathVariable Long userId) {
-//		userService.updateUser(user, userId);
-//		System.out.println("User updated successfully");
+		userService.updateUser(user, userId);
+		System.out.println("User updated successfully");
 	}
 
 	/**
@@ -69,10 +70,10 @@ public class UserController {
 	 * 
 	 * @param userId The unique ID of the user.
 	 */
-//	@PutMapping("/{userId}/role")
-//	public void updateRole(@RequestBody UserRole userRole, @PathVariable Long userId) {
-//		userLoginServiceImple.updateUserRoles(userRole, userId);
-//	}
+	@PutMapping("/{userId}/role")
+	public void updateRole(@RequestBody UserRole userRole, @PathVariable Long userId) {
+		userService.updateUserRoles(userRole, userId);
+	}
 
 	/**
 	 * Fetches the details of a specific user by their unique identifier. * @param
@@ -80,8 +81,8 @@ public class UserController {
 	 * 
 	 * @return The User entity matching the provided ID.
 	 */
-//	@GetMapping("/{id}")
-//	public User getuser(@PathVariable Long id) {
-//		return userService.getById;
-//	}
+	@GetMapping("/{id}")
+	public ResponseEntity<UserResponse> getuser(@PathVariable Long id) {
+		return ResponseEntity.ok(userService.findById(id));
+	}
 }

@@ -7,15 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.cts.transport_gov.compliance_audit_service.dto.ApiResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.RouteResponse;
 
-@FeignClient(name = "route-service")
+@FeignClient(name = "ROUTESCHEDULESERVICE", path = "/route")
 public interface RouteFeignClient {
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<RouteResponse>> getRouteById(@PathVariable Long id);
+	public ResponseEntity<RouteResponse> getRouteById(@PathVariable Long id);
 
 	@GetMapping("/type/{type}")
-	public ResponseEntity<ApiResponse<List<RouteResponse>>> getRoutesByType(@PathVariable String type);
+	public ResponseEntity<List<RouteResponse>> getRoutesByType(@PathVariable String type);
 }

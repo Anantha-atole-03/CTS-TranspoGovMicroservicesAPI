@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cts.transport_gov.compliance_audit_service.dto.TicketResponse;
 
-@FeignClient(name = "ticket-service")
+@FeignClient(name = "TICKETFARESERVICE", path = "/ticket")
 public interface TicketFeginCient {
 
 	@GetMapping("/{ticketId}")
-	public ResponseEntity<TicketResponse> getTicketById(@PathVariable Long ticketId);
+	public ResponseEntity<TicketResponse> getTicket(@PathVariable Long ticketId);
 
 }
