@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NotificationService implements INotificationService {
 
 	private static final String TEST_USER_EMAIL = "apreamey2463@gmail.com";
-	private static final String TEST_CITIZEN_EMAIL = "atoleanantha03@gmail.com";
+	private static final String TEST_CITIZEN_EMAIL = "ravi@mail.com";
 
 	private static final String USER_NOT_FOUND_ID = "User not found with id";
 	private static final String USER_NOT_FOUND_EMAIL = "User not found with email";
@@ -165,7 +165,8 @@ public class NotificationService implements INotificationService {
 				.build();
 
 		Notification savedNotification = notificationRepository.save(notification);
-		log.debug("Notification saved");
+
+		log.debug("Notification saved At:{}", savedNotification.getCreatedDate());
 		String emailContent = MailTemplates.getGeneralNotificationTemplate(request.getEmail(), request.getMessage());
 
 		sendEmail(request.getEmail(), "TranspoGov Notification", emailContent);

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cts.transport_gov.notification_service.dto.ComplianceNotificationRequest;
@@ -44,14 +44,14 @@ public class NotificationController {
 	 */
 	// GET /notifications?userId=123
 	@GetMapping("/user")
-	public ResponseEntity<List<NotificationResponse>> getUserNotifications(@RequestParam Long userId) {
+	public ResponseEntity<List<NotificationResponse>> getUserNotifications(@RequestHeader("X-User-Id") Long userId) {
 		log.info("Fetching user notifications");
 		List<NotificationResponse> notifications = notificationService.getUserNotifications(userId);
 		return ResponseEntity.ok(notifications);
 	}
 
 	@GetMapping("/citizen")
-	public ResponseEntity<List<NotificationResponse>> getCitizenNotifications(@RequestParam Long userId) {
+	public ResponseEntity<List<NotificationResponse>> getCitizenNotifications(@RequestHeader("X-User-Id") Long userId) {
 		log.info("Fetching user notifications");
 		List<NotificationResponse> notifications = notificationService.getCitizenNotifications(userId);
 		return ResponseEntity.ok(notifications);
