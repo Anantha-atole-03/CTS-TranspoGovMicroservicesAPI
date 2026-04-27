@@ -65,11 +65,16 @@ public class ComplianceRecordController {
 	 * 
 	 */
 	@GetMapping("/getByEntity/{entityId}")
-	public ResponseEntity<List<ComplianceResponse>> findByEntityId(@PathVariable("entityId") Long entityId) {
+	public ResponseEntity<List<ComplianceResponse>> findByEntityId(@PathVariable Long entityId) {
 
 		return ResponseEntity.ok(service.findByEntityId(entityId));
 	}
 //
+//	@GetMapping("/by-type/{type}")
+//	public ResponseEntity<List<ComplianceResponse>> getByType(@PathVariable("type") ComplianceType type) {
+//		return ResponseEntity.ok(service.findByType(type));
+//	}
+
 //	@GetMapping("/summary")
 //	public ResponseEntity<ApiResponse<?>> getCount() {
 //		return ResponseEntity

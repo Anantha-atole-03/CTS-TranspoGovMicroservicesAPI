@@ -50,7 +50,8 @@ public class WebSecurityConfig {
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
 						// --- Ticketing ---
-						.requestMatchers(HttpMethod.GET, "/ticket/**").hasAnyRole(CITIZEN_PASSENGER, TRANSPORT_OFFICER)
+						.requestMatchers(HttpMethod.GET, "/ticket/**")
+						.hasAnyRole(CITIZEN_PASSENGER, TRANSPORT_OFFICER, COMPLIANCE_OFFICER)
 						.requestMatchers(HttpMethod.POST, "/ticket/**").hasRole(CITIZEN_PASSENGER)
 						.requestMatchers(HttpMethod.POST, "/ticket/*/check").hasRole(TRANSPORT_OFFICER)
 

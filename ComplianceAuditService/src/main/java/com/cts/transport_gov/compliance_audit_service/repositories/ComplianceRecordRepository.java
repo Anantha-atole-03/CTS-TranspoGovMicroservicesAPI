@@ -12,6 +12,9 @@ import com.cts.transport_gov.compliance_audit_service.model.ComplianceRecord;
 public interface ComplianceRecordRepository extends JpaRepository<ComplianceRecord, Long> {
 
 	List<ComplianceRecord> findByEntityId(Long entityId);
+
 	int countByResult(ComplianceResultStatus result);
+
+//	List<ComplianceRecord> findByType(ComplianceType Type);
 
 }

@@ -23,6 +23,8 @@ public interface IComplianceRecordService {
 
 	String create(ComplianceCreateRequest record);
 
+//	List<ComplianceResponse> findByType(ComplianceType type);
+
 //	Map<ComplianceResultStatus, Long> getStatusWiseCount();
 
 }

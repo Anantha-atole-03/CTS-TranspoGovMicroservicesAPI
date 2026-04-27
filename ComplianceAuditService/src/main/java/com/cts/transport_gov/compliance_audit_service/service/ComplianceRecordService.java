@@ -1,5 +1,6 @@
 package com.cts.transport_gov.compliance_audit_service.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,10 @@ public class ComplianceRecordService implements IComplianceRecordService {
 			}
 		}
 
-		ComplianceRecord saved = repository.save(modelMapper.map(record, ComplianceRecord.class));
+		ComplianceRecord entity = modelMapper.map(record, ComplianceRecord.class);
+		entity.setComplianceDate(LocalDate.now());
+
+		ComplianceRecord saved = repository.save(entity);
 
 		log.info("Compliance record created with id: {}", saved.getComplianceId());
 		return "Record Saved successsfully";
@@ -170,6 +174,24 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		return records.stream().map(record -> modelMapper.map(record, ComplianceResponse.class))
 				.collect(Collectors.toList());
 	}
+//	@Override
+//	public List<ComplianceResponse> findByType(ComplianceType type) {
+//
+//	    log.info("Fetching compliance records by type: {}", type);
+//
+//	    List<ComplianceRecord> records = repository.findByType(type);
+//
+//	    if (records.isEmpty()) {
+//	        log.warn("No compliance records found for type: {}", type);
+//	        throw new ComplianceNotFoundException(
+//	                "No compliance records found for type: " + type
+//	        );
+//	    }
+//
+//	    return records.stream()
+//	            .map(record -> modelMapper.map(record, ComplianceResponse.class))
+//	            .collect(Collectors.toList());
+//	}
 
 	@Override
 	public Long getCount() {
