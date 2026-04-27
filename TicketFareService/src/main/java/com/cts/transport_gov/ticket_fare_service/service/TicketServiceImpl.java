@@ -68,7 +68,7 @@ public class TicketServiceImpl implements ITicketService {
 
 			TicketResponse ticketBean = modelMapper.map(ticket, TicketResponse.class);
 			ticketBean.setCitizenId(ticket.getCitizen());
-			ticketBean.setRoute(modelMapper.map(ticket.getRoute(), RouteResponse.class));
+			ticketBean.setRoute(routeFeignClient.getRouteById(ticket.getRoute()).getBody());
 			return ticketBean;
 		}).collect(Collectors.toList());
 	}
@@ -126,7 +126,7 @@ public class TicketServiceImpl implements ITicketService {
 		});
 		TicketResponse response = modelMapper.map(ticket, TicketResponse.class);
 		response.setCitizenId(ticket.getCitizen());
-		response.setRoute(modelMapper.map(ticket.getRoute(), RouteResponse.class));
+		response.setRoute(routeFeignClient.getRouteById(ticket.getRoute()).getBody());
 
 		return response;
 	}
@@ -169,6 +169,7 @@ public class TicketServiceImpl implements ITicketService {
 
 		TicketResponse ticketResponse = modelMapper.map(savedTicket, TicketResponse.class);
 		ticketResponse.setCitizenId(response.getBody().getCitizenId());
+		ticketResponse.setRoute(apiResponse.getBody());
 
 		return ticketResponse;
 	}
