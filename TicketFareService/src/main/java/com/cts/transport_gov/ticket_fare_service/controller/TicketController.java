@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,8 +41,8 @@ public class TicketController {
 	 * Description: Get all tickets booked by a citizen. URL: GET
 	 * /tickets/citizen/{citizenId}
 	 */
-	@GetMapping("/citizen/{citizenId}")
-	public ResponseEntity<List<TicketResponse>> getMyAllTickets(@PathVariable Long citizenId) {
+	@GetMapping("/citizen")
+	public ResponseEntity<List<TicketResponse>> getMyAllTickets(@RequestHeader("X-USER-ID") Long citizenId) {
 
 		log.info("API call: Get all tickets for CitizenId: {}", citizenId);
 
@@ -74,8 +75,9 @@ public class TicketController {
 	 * Description: Book a new ticket. URL: POST /tickets/book
 	 */
 	@PostMapping("/book")
-	public ResponseEntity<TicketResponse> bookTicket(@RequestBody TicketCreateRequest request) {
-
+	public ResponseEntity<TicketResponse> bookTicket(@RequestBody TicketCreateRequest request,
+			@RequestHeader("X-USER-ID") Long citizenId) {
+		request.setCitizenId(citizenId);
 		log.info("API call: Book ticket for CitizenId: {}", request.getCitizenId());
 		TicketResponse response = ticketService.bookTicket(request);
 

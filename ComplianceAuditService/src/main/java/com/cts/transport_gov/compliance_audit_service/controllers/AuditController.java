@@ -46,14 +46,8 @@ public class AuditController {
 
 	/* ========= GET /audits — List audits (filters, pagination) ========= */
 	@GetMapping("/")
-<<<<<<< HEAD
-	public ResponseEntity<List<AuditResponse>> findAll() {
-		List<AuditResponse> audits = auditService.findAll();
-		return ResponseEntity.ok(audits);
-=======
 	public ResponseEntity<List> findAll() {
 		return ResponseEntity.ok(auditService.findAll());
->>>>>>> e8f5c21746fcf37cda7be901d892053f08e46834
 	}
 
 	/* ========= GET /audits/{id} — Audit details + findings ========= */

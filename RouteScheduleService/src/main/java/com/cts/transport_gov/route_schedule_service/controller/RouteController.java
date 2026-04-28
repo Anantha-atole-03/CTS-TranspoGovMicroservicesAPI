@@ -21,7 +21,7 @@ import com.cts.transport_gov.route_schedule_service.services.IRouteService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/route/")
+@RequestMapping("/route")
 @RequiredArgsConstructor
 public class RouteController {
 

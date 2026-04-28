@@ -85,12 +85,9 @@ public class CitizenController {
 		userService.updateUserRoles(userRole, userId);
 	}
 
-<<<<<<< HEAD
 	@GetMapping("/email/{email}")
 	public CitizenResponse getCitizenByEmail(@PathVariable String email) {
 		return citizenServiceImpl.getCitizenByEmail(email);
 	}
 
-=======
->>>>>>> e8f5c21746fcf37cda7be901d892053f08e46834
 }
