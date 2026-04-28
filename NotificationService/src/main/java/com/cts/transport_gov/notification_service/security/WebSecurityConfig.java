@@ -49,10 +49,16 @@ public class WebSecurityConfig {
 						// --- Public Endpoints ---
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						// --- Notifications ---
-						.requestMatchers(HttpMethod.GET, "/notification").authenticated()
-						.requestMatchers(HttpMethod.PATCH, "/notification/**").authenticated()
+						.requestMatchers(HttpMethod.GET, "/notification/**")
+						.hasAnyAuthority("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "PROGRAM_MANAGER", "ADMINISTRATOR",
+								"COMPLIANCE_OFFICER", "GOVERNMENT_AUDITOR")
+
+						.requestMatchers(HttpMethod.PATCH, "/notification/**")
+						.hasAnyAuthority("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "PROGRAM_MANAGER", "ADMINISTRATOR",
+								"COMPLIANCE_OFFICER", "GOVERNMENT_AUDITOR")
+
 						.requestMatchers(HttpMethod.POST, "/notification/save")
-						.hasAnyRole(TRANSPORT_OFFICER, PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER)
+						.hasAnyAuthority("TRANSPORT_OFFICER", "PROGRAM_MANAGER", "ADMINISTRATOR", "COMPLIANCE_OFFICER")
 
 						// All other requests must be authenticated
 						.anyRequest().authenticated())

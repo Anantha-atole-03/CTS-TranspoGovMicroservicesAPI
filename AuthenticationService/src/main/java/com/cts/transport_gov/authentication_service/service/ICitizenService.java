@@ -19,5 +19,7 @@ public interface ICitizenService {
 
 	void forgotPasswordC(String phone, String newPassword);
 
+	CitizenResponse getCitizenByEmail(String email);
+
 	// void forgotPassword(String phone, String newPassword);
 }

@@ -51,8 +51,7 @@ public class WebSecurityConfig {
 						// --- Reporting ---
 						.requestMatchers(HttpMethod.GET, "/report/operations")
 						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
-						.requestMatchers(HttpMethod.POST, "/report/custom/run")
-						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
+						.requestMatchers(HttpMethod.POST, "/report/custom/run").hasAnyRole(ADMINISTRATOR)
 						.requestMatchers(HttpMethod.GET, "/report/custom/jobs/**")
 						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
 

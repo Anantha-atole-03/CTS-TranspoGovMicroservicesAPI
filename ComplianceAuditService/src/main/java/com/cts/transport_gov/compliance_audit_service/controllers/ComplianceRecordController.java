@@ -69,11 +69,10 @@ public class ComplianceRecordController {
 
 		return ResponseEntity.ok(service.findByEntityId(entityId));
 	}
-//
-//	@GetMapping("/summary")
-//	public ResponseEntity<ApiResponse<?>> getCount() {
-//		return ResponseEntity
-//				.ok(new ApiResponse<>("Count fetched!", HttpStatus.OK.value(), service.getStatusWiseCount()));
-//	}
+
+	@GetMapping("/summary")
+	public ResponseEntity<?> getCount() {
+		return ResponseEntity.ok(service.getCount());
+	}
 
 }

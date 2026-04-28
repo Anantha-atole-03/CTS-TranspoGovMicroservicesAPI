@@ -192,8 +192,6 @@ public class AuditService implements IAuditService {
 	/* ---------------- HELPER ---------------- */
 
 	private AuditResponse toAuditResponse(Audit audit) {
-
-		// ✅ ModelMapper used (entity → response)
 		AuditResponse dto = modelMapper.map(audit, AuditResponse.class);
 		return dto;
 	}

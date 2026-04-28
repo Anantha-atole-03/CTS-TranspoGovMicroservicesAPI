@@ -62,4 +62,9 @@ public class RouteController {
 		List<RouteResponse> routes = routeService.getRoutesByType(type);
 		return ResponseEntity.ok(routes);
 	}
+
+	@GetMapping("/count/active")
+	public ResponseEntity<Integer> getActiveRouteCount() {
+		return ResponseEntity.ok(routeService.countActiveRoutes());
+	}
 }

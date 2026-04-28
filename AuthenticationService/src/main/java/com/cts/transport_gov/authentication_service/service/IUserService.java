@@ -16,5 +16,7 @@ public interface IUserService {
 
 	void updateUserRoles(UserRole userRole, Long userId);
 
+	UserResponse findByEmail(String email);
+
 	UserResponse findById(Long id);
 }

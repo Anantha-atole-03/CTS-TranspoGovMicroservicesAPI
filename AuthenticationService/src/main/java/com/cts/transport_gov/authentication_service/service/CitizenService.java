@@ -153,4 +153,12 @@ public class CitizenService implements ICitizenService {
 			userRepository.save(user);
 		});
 	}
+
+	@Override
+	public CitizenResponse getCitizenByEmail(String email) {
+		Citizen citizen = citizenRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("Citizen not found with email: " + email));
+		return mapper.map(citizen, CitizenResponse.class);
+	}
+
 }

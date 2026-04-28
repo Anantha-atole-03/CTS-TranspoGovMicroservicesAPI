@@ -150,4 +150,14 @@ public class UserService implements IUserService {
 		return modelMapper.map(userRepository.findById(id).orElse(null), UserResponse.class);
 	}
 
+	@Override
+	public UserResponse findByEmail(String email) {
+		log.debug("Finding user by email: {}", email);
+		if (email == null) {
+			log.warn("findById called with null email");
+			throw new IllegalArgumentException("Invalid user email");
+		}
+		return modelMapper.map(userRepository.findByEmail(email).orElse(null), UserResponse.class);
+	}
+
 }
