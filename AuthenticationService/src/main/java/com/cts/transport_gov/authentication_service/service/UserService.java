@@ -12,6 +12,7 @@ import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
 import com.cts.transport_gov.authentication_service.exceptions.AuthenticationException;
+import com.cts.transport_gov.authentication_service.exceptions.InvalidDataException;
 import com.cts.transport_gov.authentication_service.model.User;
 import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
 import com.cts.transport_gov.authentication_service.respository.UserRepository;
@@ -43,6 +44,9 @@ public class UserService implements IUserService {
 			throw new AuthenticationException("User alredy exists");
 		}
 
+		if (requestDto.getRole().equals(UserRole.CITIZEN_PASSENGER)) {
+			throw new InvalidDataException("Invalid user role! provide currect data");
+		}
 		User user = modelMapper.map(requestDto, User.class);
 
 		String password = generateSixDigitPassword();
