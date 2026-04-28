@@ -15,6 +15,5 @@ public class NotificationFeignFallback implements NotificationFeignClient {
 	public ResponseEntity<?> sendBookNotification(Long id) {
 		log.info("Inside notification feign Fallback method");
 		throw new ServiceUnavailableException("Notification Service Unavailable. Try again later");
-
 	}
 }
