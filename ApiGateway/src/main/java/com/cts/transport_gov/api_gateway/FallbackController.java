@@ -3,6 +3,7 @@ package com.cts.transport_gov.api_gateway;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,7 +39,8 @@ public class FallbackController {
 		return Mono.just("Compliance and Audit Service is currently unavailable");
 	}
 
-	@GetMapping("/notification-service-fallback")
+	@RequestMapping(value = "/notification-service-fallback", method = { RequestMethod.GET, RequestMethod.POST,
+			RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE })
 	public Mono<String> notificationServiceCircuitBreaker() {
 		return Mono.just("Notification Service is currently unavailable");
 	}
