@@ -16,7 +16,11 @@ public interface IUserService {
 
 	void updateUserRoles(UserRole userRole, Long userId);
 
+<<<<<<< HEAD
 	User findById(Long id);
 
 	UserResponse findByEmail(String email);
+=======
+	UserResponse findById(Long id);
+>>>>>>> e8f5c21746fcf37cda7be901d892053f08e46834
 }

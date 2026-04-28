@@ -2,6 +2,7 @@ package com.cts.transport_gov.compliance_audit_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -46,7 +47,28 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// --- Public Endpoints ---
-						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/**").permitAll()
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+						.requestMatchers(HttpMethod.POST, "/compliance/save").hasRole(COMPLIANCE_OFFICER)
+
+						.requestMatchers(HttpMethod.PATCH, "/compliance/update/**").hasRole(COMPLIANCE_OFFICER)
+
+						.requestMatchers(HttpMethod.DELETE, "/compliance/delete/**").hasRole(COMPLIANCE_OFFICER)
+
+						.requestMatchers(HttpMethod.GET, "/compliance/**")
+						.hasAnyRole(ADMINISTRATOR, GOVERNMENT_AUDITOR, COMPLIANCE_OFFICER)
+
+						.requestMatchers(HttpMethod.POST, "/audit/create").hasRole(GOVERNMENT_AUDITOR)
+
+						.requestMatchers(HttpMethod.PATCH, "/audit/update/**").hasRole(GOVERNMENT_AUDITOR)
+
+						.requestMatchers(HttpMethod.DELETE, "/audit/delete/**").hasRole(GOVERNMENT_AUDITOR)
+
+						.requestMatchers(HttpMethod.GET, "/audit/{id}/close").hasRole(GOVERNMENT_AUDITOR)
+
+						.requestMatchers(HttpMethod.GET, "/audit/summary").hasAnyRole(ADMINISTRATOR, GOVERNMENT_AUDITOR)
+
+						.requestMatchers(HttpMethod.GET, "/audit/**").hasAnyRole(GOVERNMENT_AUDITOR, ADMINISTRATOR)
 
 						// All other requests must be authenticated
 						.anyRequest().authenticated())

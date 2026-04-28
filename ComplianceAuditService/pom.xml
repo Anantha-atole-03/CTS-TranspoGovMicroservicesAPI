@@ -140,6 +140,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security-test</artifactId>
 			<scope>test</scope>
+
 		</dependency>
 	</dependencies>
 	<dependencyManagement>

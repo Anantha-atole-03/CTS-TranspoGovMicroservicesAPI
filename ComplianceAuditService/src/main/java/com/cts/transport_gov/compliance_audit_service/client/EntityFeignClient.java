@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cts.transport_gov.compliance_audit_service.dto.UserResponse;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "AUTHENTICATIONSERVICE", path = "/users")
 public interface EntityFeignClient {
 
-	@GetMapping("/api/users/{id}")
-	ResponseEntity<UserResponse> getUserById(@PathVariable("id") Long id);
+	@GetMapping("/{id}")
+	public ResponseEntity<UserResponse> getuser(@PathVariable Long id);
 }

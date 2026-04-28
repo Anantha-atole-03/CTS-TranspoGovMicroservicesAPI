@@ -137,13 +137,13 @@ public class UserService implements IUserService {
 	 * @return The User entity if found, or null if not present.
 	 */
 	@Override
-	public User findById(Long id) {
+	public UserResponse findById(Long id) {
 		log.debug("Finding user by ID: {}", id);
 		if (id == null) {
 			log.warn("findById called with null ID");
 			throw new IllegalArgumentException("Invalid user ID");
 		}
-		return userRepository.findById(id).orElse(null);
+		return modelMapper.map(userRepository.findById(id).orElse(null), UserResponse.class);
 	}
 
 	@Override

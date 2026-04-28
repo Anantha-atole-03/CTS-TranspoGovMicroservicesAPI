@@ -82,6 +82,7 @@ public class UserController {
 	 * @return The User entity matching the provided ID.
 	 */
 	@GetMapping("/{id}")
+<<<<<<< HEAD
 	public User getuser(@PathVariable Long id) {
 		return userService.findById(id);
 	}
@@ -89,5 +90,9 @@ public class UserController {
 	@GetMapping("/email/{email}")
 	public ResponseEntity<UserResponse> getuser(@PathVariable String email) {
 		return ResponseEntity.ok(userService.findByEmail(email));
+=======
+	public ResponseEntity<UserResponse> getuser(@PathVariable Long id) {
+		return ResponseEntity.ok(userService.findById(id));
+>>>>>>> e8f5c21746fcf37cda7be901d892053f08e46834
 	}
 }

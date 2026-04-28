@@ -15,6 +15,6 @@ public class CitizenFeignFallback implements CitizenFeignClient {
 	@Override
 	public ResponseEntity<CitizenResponse> getCitizenById(Long id) {
 		log.info("Inside Citizen feign Fallback method");
-		throw new ServiceUnavailableException("User Service Unavailable. Try again later");
+		throw new ServiceUnavailableException("Citizen Service Unavailable. Try again later");
 	}
 }

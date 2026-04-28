@@ -30,36 +30,37 @@ public class AuditController {
 
 	/* ========= POST /audits — Create audit ========= */
 	@PostMapping("/create")
-	public ResponseEntity<AuditResponse> create(@RequestBody CreateAuditRequest request) {
-		AuditResponse response = auditService.create(request);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	public ResponseEntity create(@RequestBody CreateAuditRequest request) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(auditService.create(request));
 	}
 
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long id) {
-		String message = auditService.delete(id);
-		return ResponseEntity.ok(new ApiResponse<>(message, HttpStatus.OK.value(), null));
+	public ResponseEntity<String> delete(@PathVariable Long id) {
+		return ResponseEntity.ok(auditService.delete(id));
 	}
 
 	@PatchMapping("/update/{id}")
-	public ResponseEntity<ApiResponse<AuditResponse>> update(@PathVariable long id,
-			@RequestBody UpdateAuditRequest body) {
-		AuditResponse updated = auditService.update(id, body);
-		return ResponseEntity.ok(new ApiResponse<>("Record updated successfully", HttpStatus.OK.value(), updated));
+	public ResponseEntity<AuditResponse> update(@PathVariable long id, @RequestBody UpdateAuditRequest body) {
+		return ResponseEntity.ok(auditService.update(id, body));
 	}
 
 	/* ========= GET /audits — List audits (filters, pagination) ========= */
 	@GetMapping("/")
+<<<<<<< HEAD
 	public ResponseEntity<List<AuditResponse>> findAll() {
 		List<AuditResponse> audits = auditService.findAll();
 		return ResponseEntity.ok(audits);
+=======
+	public ResponseEntity<List> findAll() {
+		return ResponseEntity.ok(auditService.findAll());
+>>>>>>> e8f5c21746fcf37cda7be901d892053f08e46834
 	}
 
 	/* ========= GET /audits/{id} — Audit details + findings ========= */
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<AuditResponse>> get(@PathVariable Long id) {
-		AuditResponse dto = auditService.findById(id);
-		return ResponseEntity.ok(new ApiResponse<>("Record fetched!", HttpStatus.OK.value(), dto));
+	public ResponseEntity<AuditResponse> get(@PathVariable Long id) {
+
+		return ResponseEntity.ok(auditService.findById(id));
 	}
 
 	/* ========= POST /audits/{id}/close — Close audit ========= */
