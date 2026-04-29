@@ -7,7 +7,7 @@ import com.cts.transport_gov.compliance_audit_service.enums.TicketStatus;
 import lombok.Data;
 
 @Data
-public class TicketResponse {
+public class TicketResponse implements ComplianceEntityResponseDto {
 	private Long ticketId;
 	private Long citizenId;
 	private RouteResponse route;

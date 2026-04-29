@@ -9,7 +9,7 @@ import com.cts.transport_gov.compliance_audit_service.dto.ProgramResponse;
 
 import jakarta.validation.constraints.NotNull;
 
-@FeignClient(name = "PROGRAMRESOURCESERVICE", path = "/programs")
+@FeignClient(name = "PROGRAMRESOURCESERVICE", fallback = ProgramFeignFallback.class, path = "/programs")
 public interface ProgramFeignClient {
 
 	@GetMapping("/{programId}")
