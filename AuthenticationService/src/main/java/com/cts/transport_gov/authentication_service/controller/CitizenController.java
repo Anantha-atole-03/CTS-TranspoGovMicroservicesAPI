@@ -84,4 +84,10 @@ public class CitizenController {
 	public void updateRole(@RequestBody UserRole userRole, @PathVariable Long userId) {
 		userService.updateUserRoles(userRole, userId);
 	}
+
+	@GetMapping("/email/{email}")
+	public CitizenResponse getCitizenByEmail(@PathVariable String email) {
+		return citizenServiceImpl.getCitizenByEmail(email);
+	}
+
 }

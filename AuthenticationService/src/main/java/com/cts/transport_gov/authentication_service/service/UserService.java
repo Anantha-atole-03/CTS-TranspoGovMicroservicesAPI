@@ -12,6 +12,7 @@ import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
 import com.cts.transport_gov.authentication_service.exceptions.AuthenticationException;
+import com.cts.transport_gov.authentication_service.exceptions.InvalidDataException;
 import com.cts.transport_gov.authentication_service.model.User;
 import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
 import com.cts.transport_gov.authentication_service.respository.UserRepository;
@@ -43,6 +44,9 @@ public class UserService implements IUserService {
 			throw new AuthenticationException("User alredy exists");
 		}
 
+		if (requestDto.getRole().equals(UserRole.CITIZEN_PASSENGER)) {
+			throw new InvalidDataException("Invalid user role! provide currect data");
+		}
 		User user = modelMapper.map(requestDto, User.class);
 
 		String password = generateSixDigitPassword();
@@ -144,6 +148,16 @@ public class UserService implements IUserService {
 			throw new IllegalArgumentException("Invalid user ID");
 		}
 		return modelMapper.map(userRepository.findById(id).orElse(null), UserResponse.class);
+	}
+
+	@Override
+	public UserResponse findByEmail(String email) {
+		log.debug("Finding user by email: {}", email);
+		if (email == null) {
+			log.warn("findById called with null email");
+			throw new IllegalArgumentException("Invalid user email");
+		}
+		return modelMapper.map(userRepository.findByEmail(email).orElse(null), UserResponse.class);
 	}
 
 }

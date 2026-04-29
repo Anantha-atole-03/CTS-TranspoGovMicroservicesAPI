@@ -42,7 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 			// check request comming through gateway only
 			if (!"gateway".equals(request.getHeader("X-Internal-Secret"))) {
-				log.info("forbidden request");
+				log.info("forbidden request secret:{}", request.getHeader("X-Internal-Secret"));
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				return;
 

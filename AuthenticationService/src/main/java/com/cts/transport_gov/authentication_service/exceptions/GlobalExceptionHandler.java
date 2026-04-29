@@ -26,6 +26,13 @@ public class GlobalExceptionHandler {
 				.body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
 	}
 
+	@ExceptionHandler(InvalidDataException.class)
+	public ResponseEntity<ExceptionResponse> handleInvalidDataException(InvalidDataException e) {
+		log.error(e.getClass() + " : " + e.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
 		StringBuilder errors = new StringBuilder();

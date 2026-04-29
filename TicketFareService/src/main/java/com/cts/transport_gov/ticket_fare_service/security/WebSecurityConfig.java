@@ -48,6 +48,9 @@ public class WebSecurityConfig {
 
 						// --- Public Endpoints ---
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/ticket/count")
+						.hasAnyRole(GOVERNMENT_AUDITOR, PROGRAM_MANAGER, COMPLIANCE_OFFICER, TRANSPORT_OFFICER,
+								ADMINISTRATOR)
 
 						// --- Ticketing ---
 						.requestMatchers(HttpMethod.GET, "/ticket/**")

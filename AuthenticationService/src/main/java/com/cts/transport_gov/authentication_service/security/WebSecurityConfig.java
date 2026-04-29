@@ -57,62 +57,30 @@ public class WebSecurityConfig {
 						.permitAll()
 
 						// --- Admin & Audit Specific ---
-						.requestMatchers(HttpMethod.PUT, "/api/citizens/{userId}/role").hasRole(ADMINISTRATOR)
-						.requestMatchers("/api/audit-logs/**").hasAnyRole(ADMINISTRATOR, GOVERNMENT_AUDITOR)
+						.requestMatchers(HttpMethod.PUT, "/citizen/{userId}/role").hasRole(ADMINISTRATOR)
+						.requestMatchers("/audit-logs/**").hasAnyRole(ADMINISTRATOR, GOVERNMENT_AUDITOR)
 
-						// --- Citizen Management Endpoints ---
-						.requestMatchers(HttpMethod.POST, "/citizen").permitAll() // Allow registration
+						.requestMatchers(HttpMethod.POST, "/citizen").permitAll()
 						.requestMatchers(HttpMethod.GET, "/citizen")
-						.hasAnyRole(ADMINISTRATOR, TRANSPORT_OFFICER, COMPLIANCE_OFFICER)
-						.requestMatchers(HttpMethod.GET, "/citizen/{id}").hasAnyRole(ADMINISTRATOR, CITIZEN_PASSENGER)
-						.requestMatchers(HttpMethod.PUT, "/citizen/{id}").hasAnyRole(ADMINISTRATOR, CITIZEN_PASSENGER)
+						.hasAnyRole("ADMINISTRATOR", "TRANSPORT_OFFICER", "COMPLIANCE_OFFICER")
+						.requestMatchers(HttpMethod.GET, "/citizen/{id}")
+						.hasAnyRole("ADMINISTRATOR", "CITIZEN_PASSENGER")
+						.requestMatchers(HttpMethod.PUT, "/citizen/{id}")
+						.hasAnyRole("ADMINISTRATOR", "CITIZEN_PASSENGER")
 
-						// --- Document Management ---
-						.requestMatchers(HttpMethod.POST, "/api/citizen-documents/upload/**").hasRole(CITIZEN_PASSENGER)
+						// -------- Citizen Role Update --------
+						.requestMatchers(HttpMethod.PUT, "/citizen/{userId}/role").hasRole("ADMINISTRATOR")
+
+						// -------- Documents --------
+						.requestMatchers(HttpMethod.POST, "/api/citizen-documents/upload/**")
+						.hasRole("CITIZEN_PASSENGER")
 						.requestMatchers(HttpMethod.GET, "/api/citizen-documents/citizen/**")
-						.hasAnyRole(CITIZEN_PASSENGER, TRANSPORT_OFFICER, ADMINISTRATOR)
+						.hasAnyRole("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "ADMINISTRATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/citizen-documents/verify/**")
-						.hasAnyRole(TRANSPORT_OFFICER, COMPLIANCE_OFFICER)
+						.hasAnyRole("TRANSPORT_OFFICER", "COMPLIANCE_OFFICER")
 
-						// --- Programs and Ticketing ---
-
-						.requestMatchers(HttpMethod.GET, "/tickets/**").hasAnyRole(CITIZEN_PASSENGER, TRANSPORT_OFFICER)
-						.requestMatchers(HttpMethod.POST, "/tickets/**").hasRole(CITIZEN_PASSENGER)
-						.requestMatchers(HttpMethod.POST, "/tickets/*/check").hasRole(TRANSPORT_OFFICER)
-						.requestMatchers(HttpMethod.GET, "/programs/{programId}").permitAll()
-						.requestMatchers(HttpMethod.GET, "/programs")
-						.hasAnyRole(CITIZEN_PASSENGER, TRANSPORT_OFFICER, PROGRAM_MANAGER, ADMINISTRATOR,
-								COMPLIANCE_OFFICER)
-						.requestMatchers(HttpMethod.POST, "/programs").hasRole(PROGRAM_MANAGER)
-						.requestMatchers(HttpMethod.POST, "/programs/*/submit").hasRole(PROGRAM_MANAGER)
-						.requestMatchers(HttpMethod.POST, "/programs/*/approve")
-						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR)
-
-						// --- Resource Allocation ---
-						.requestMatchers(HttpMethod.GET, "/resources")
-						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER)
-						.requestMatchers(HttpMethod.POST, "/resources/*/allocate")
-						.hasAnyRole(PROGRAM_MANAGER, COMPLIANCE_OFFICER)
-						.requestMatchers(HttpMethod.POST, "/resources/*/utilizations")
-						.hasAnyRole(PROGRAM_MANAGER, COMPLIANCE_OFFICER)
-
-						// --- Reporting ---
-						.requestMatchers(HttpMethod.GET, "/report/operations")
-						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
-						.requestMatchers(HttpMethod.POST, "/report/custom/run")
-						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
-						.requestMatchers(HttpMethod.GET, "/report/custom/jobs/**")
-						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
-
-						// --- Notifications ---
-						.requestMatchers(HttpMethod.GET, "/notification").authenticated()
-						.requestMatchers(HttpMethod.PATCH, "/notification/**").authenticated()
-						.requestMatchers(HttpMethod.POST, "/notification/save")
-						.hasAnyRole(TRANSPORT_OFFICER, PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER)
-
-						// --- User Management ---
-						.requestMatchers("/user/**").hasRole(ADMINISTRATOR)
-
+						// -------- User --------
+						.requestMatchers("/users/**").hasRole("ADMINISTRATOR")
 						// All other requests must be authenticated
 						.anyRequest().authenticated())
 				// Adding our custom JWT filter before the standard

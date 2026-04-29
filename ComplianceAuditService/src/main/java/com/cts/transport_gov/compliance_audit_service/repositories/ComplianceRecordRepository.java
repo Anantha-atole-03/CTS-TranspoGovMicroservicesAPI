@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.cts.transport_gov.compliance_audit_service.enums.ComplianceResultStatus;
+import com.cts.transport_gov.compliance_audit_service.enums.ComplianceType;
 import com.cts.transport_gov.compliance_audit_service.model.ComplianceRecord;
 
 @Repository
@@ -15,6 +16,6 @@ public interface ComplianceRecordRepository extends JpaRepository<ComplianceReco
 
 	int countByResult(ComplianceResultStatus result);
 
-//	List<ComplianceRecord> findByType(ComplianceType Type);
+	List<ComplianceRecord> findByType(ComplianceType Type);
 
 }

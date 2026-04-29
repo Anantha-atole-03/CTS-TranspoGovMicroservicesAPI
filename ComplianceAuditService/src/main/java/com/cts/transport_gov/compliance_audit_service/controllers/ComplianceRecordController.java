@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceCreateRequest;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceUpdate;
+import com.cts.transport_gov.compliance_audit_service.enums.ComplianceType;
 import com.cts.transport_gov.compliance_audit_service.service.ComplianceRecordService;
 
 import lombok.RequiredArgsConstructor;
@@ -69,16 +70,15 @@ public class ComplianceRecordController {
 
 		return ResponseEntity.ok(service.findByEntityId(entityId));
 	}
-//
-//	@GetMapping("/by-type/{type}")
-//	public ResponseEntity<List<ComplianceResponse>> getByType(@PathVariable("type") ComplianceType type) {
-//		return ResponseEntity.ok(service.findByType(type));
-//	}
 
-//	@GetMapping("/summary")
-//	public ResponseEntity<ApiResponse<?>> getCount() {
-//		return ResponseEntity
-//				.ok(new ApiResponse<>("Count fetched!", HttpStatus.OK.value(), service.getStatusWiseCount()));
-//	}
+	@GetMapping("/by-type/{type}")
+	public ResponseEntity<List<ComplianceResponse>> getByType(@PathVariable("type") ComplianceType type) {
+		return ResponseEntity.ok(service.findByType(type));
+	}
+
+	@GetMapping("/summary")
+	public ResponseEntity<?> getCount() {
+		return ResponseEntity.ok(service.getCount());
+	}
 
 }

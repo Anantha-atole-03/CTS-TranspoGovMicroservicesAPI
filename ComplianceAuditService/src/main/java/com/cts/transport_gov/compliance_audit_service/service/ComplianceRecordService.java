@@ -135,24 +135,22 @@ public class ComplianceRecordService implements IComplianceRecordService {
 			return complianceResponse;
 		}).collect(Collectors.toList());
 	}
-//	@Override
-//	public List<ComplianceResponse> findByType(ComplianceType type) {
-//
-//	    log.info("Fetching compliance records by type: {}", type);
-//
-//	    List<ComplianceRecord> records = repository.findByType(type);
-//
-//	    if (records.isEmpty()) {
-//	        log.warn("No compliance records found for type: {}", type);
-//	        throw new ComplianceNotFoundException(
-//	                "No compliance records found for type: " + type
-//	        );
-//	    }
-//
-//	    return records.stream()
-//	            .map(record -> modelMapper.map(record, ComplianceResponse.class))
-//	            .collect(Collectors.toList());
-//	}
+
+	@Override
+	public List<ComplianceResponse> findByType(ComplianceType type) {
+
+		log.info("Fetching compliance records by type: {}", type);
+
+		List<ComplianceRecord> records = repository.findByType(type);
+
+		if (records.isEmpty()) {
+			log.warn("No compliance records found for type: {}", type);
+			throw new ComplianceNotFoundException("No compliance records found for type: " + type);
+		}
+
+		return records.stream().map(record -> modelMapper.map(record, ComplianceResponse.class))
+				.collect(Collectors.toList());
+	}
 
 	@Override
 	public Long getCount() {
