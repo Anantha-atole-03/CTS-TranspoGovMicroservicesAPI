@@ -67,4 +67,5 @@ public class RouteController {
 	public ResponseEntity<Integer> getActiveRouteCount() {
 		return ResponseEntity.ok(routeService.countActiveRoutes());
 	}
+
 }
