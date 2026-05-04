@@ -14,8 +14,9 @@ public interface ICitizenDocumentService {
 
 	List<CitizenDocumentResponse> getDocumentsByCitizen(Long citizenId);
 
-	CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
-			String verificationStatus);
+	// CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request,
+	// String filePath,
+	//String verificationStatus);
 
 	String upload(DocumentUploadReq req);
 }

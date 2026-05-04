@@ -67,6 +67,7 @@ public class WebSecurityConfig {
 						.hasAnyRole("ADMINISTRATOR", "CITIZEN_PASSENGER")
 						.requestMatchers(HttpMethod.PUT, "/citizen/{id}")
 						.hasAnyRole("ADMINISTRATOR", "CITIZEN_PASSENGER")
+						.requestMatchers("/notification/**").permitAll()
 
 						// -------- Citizen Role Update --------
 						.requestMatchers(HttpMethod.PUT, "/citizen/{userId}/role").hasRole("ADMINISTRATOR")

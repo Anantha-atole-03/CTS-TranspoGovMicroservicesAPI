@@ -34,29 +34,29 @@ public class CitizenDocumentServiceImpl implements ICitizenDocumentService {
 
 	// ===================== FILE UPLOAD FLOW =====================
 
-	@Override
-	@Transactional
-	public CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
-			String verificationStatus) {
+//	@Override
+//	@Transactional
+//	public CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
+//			String verificationStatus) {
+//
+//		log.info("Uploading document for citizenId={}", request.getCitizenId());
+//
+//		Citizen citizen = citizenRepository.findById(request.getCitizenId())
+//				.orElseThrow(() -> new RuntimeException("Citizen not found"));
+//
+//		CitizenDocument document = CitizenDocument.builder().citizen(citizen).docType(request.getDocType())
+//				.fileURI(filePath).uploadedDate(LocalDate.now())
+//				.verificationStatus(DocumentVerificationStatus.valueOf(verificationStatus.toUpperCase())).build();
+//
+//		CitizenDocument saved = citizenDocumentRepository.save(document);
+//
+//		auditLogRepository.save(AuditLog.builder().userId(citizen.getCitizenId()).action("DOCUMENT_UPLOAD")
+//				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
+//
+//		return mapToResponse(saved);
+//	}
 
-		log.info("Uploading document for citizenId={}", request.getCitizenId());
-
-		Citizen citizen = citizenRepository.findById(request.getCitizenId())
-				.orElseThrow(() -> new RuntimeException("Citizen not found"));
-
-		CitizenDocument document = CitizenDocument.builder().citizen(citizen).docType(request.getDocType())
-				.fileURI(filePath).uploadedDate(LocalDate.now())
-				.verificationStatus(DocumentVerificationStatus.valueOf(verificationStatus.toUpperCase())).build();
-
-		CitizenDocument saved = citizenDocumentRepository.save(document);
-
-		auditLogRepository.save(AuditLog.builder().userId(citizen.getCitizenId()).action("DOCUMENT_UPLOAD")
-				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
-
-		return mapToResponse(saved);
-	}
-
-	// ===================== JSON (FRD) UPLOAD FLOW =====================
+	
 
 	@Override
 	@Transactional

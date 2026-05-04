@@ -8,6 +8,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cts.transport_gov.authentication_service.client.NotificationServiceClient;
+import com.cts.transport_gov.authentication_service.dto.OtpNotificationRequest;
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
@@ -33,6 +35,7 @@ public class UserService implements IUserService {
 	private final PasswordEncoder passwordEncoder;
 	private final AuditLogRepository auditLogRepository;
 	private final ModelMapper modelMapper;
+	private final NotificationServiceClient client;
 
 	// ✅ CORRECT injection
 	private final AuditLogService auditLogService;
@@ -58,7 +61,13 @@ public class UserService implements IUserService {
 		User savedUser = userRepository.save(user);
 
 		log.warn("Password: {} for user: {}", requestDto.getPhone(), password);
-
+		
+		OtpNotificationRequest otp = new OtpNotificationRequest();
+		otp.setEmail(requestDto.getEmail());
+		otp.setOtp(password);
+		
+		client.sendOtpNotification(otp);
+		
 		// ✅ AUDIT LOG
 		auditLogService.logAction(savedUser.getUserId(), "REGISTER_USER", "IDENTITY");
 
@@ -111,6 +120,7 @@ public class UserService implements IUserService {
 		SecureRandom random = new SecureRandom();
 		return String.valueOf(100000 + random.nextInt(900000));
 	}
+
 	@Override
 	@Transactional
 	public List<AuditLog> getAllLogs(Long adminId) {

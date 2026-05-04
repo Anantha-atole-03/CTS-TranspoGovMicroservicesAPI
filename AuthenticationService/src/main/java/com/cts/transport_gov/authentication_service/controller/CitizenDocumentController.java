@@ -26,34 +26,34 @@ public class CitizenDocumentController {
 
     // ===================== MULTIPART FILE UPLOAD =====================
 
-    @PostMapping(
-        value = "/upload/{citizenId}",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public CitizenDocumentResponse uploadDocument(
-            @PathVariable Long citizenId,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("docType") String docType,
-            @RequestParam(
-                value = "verificationStatus",
-                defaultValue = "PENDING") String verificationStatus)
-            throws IOException {
-
-        String uploadDir = "uploads";
-        File dir = new File(uploadDir);
-        if (!dir.exists()) dir.mkdirs();
-
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir, fileName);
-
-        Files.write(filePath, file.getBytes());
-
-        CitizenDocumentCreateRequest request = new CitizenDocumentCreateRequest();
-        request.setCitizenId(citizenId);
-        request.setDocType(docType);
-
-        return citizenDocumentService
-                .uploadDocument(request, filePath.toString(), verificationStatus);
-    }
+//    @PostMapping(
+//        value = "/upload/{citizenId}",
+//        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public CitizenDocumentResponse uploadDocument(
+//            @PathVariable Long citizenId,
+//            @RequestParam("file") MultipartFile file,
+//            @RequestParam("docType") String docType,
+//            @RequestParam(
+//                value = "verificationStatus",
+//                defaultValue = "PENDING") String verificationStatus)
+//            throws IOException {
+//
+//        String uploadDir = "uploads";
+//        File dir = new File(uploadDir);
+//        if (!dir.exists()) dir.mkdirs();
+//
+//        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+//        Path filePath = Paths.get(uploadDir, fileName);
+//
+//        Files.write(filePath, file.getBytes());
+//
+//        CitizenDocumentCreateRequest request = new CitizenDocumentCreateRequest();
+//        request.setCitizenId(citizenId);
+//        request.setDocType(docType);
+//
+//        return citizenDocumentService
+//                .uploadDocument(request, filePath.toString(), verificationStatus);
+//    }
 
     // ===================== JSON-ONLY (FRD) UPLOAD =====================
 
