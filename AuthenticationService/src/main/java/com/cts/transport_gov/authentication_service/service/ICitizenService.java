@@ -22,4 +22,5 @@ public interface ICitizenService {
 	CitizenResponse getCitizenByEmail(String email);
 
 	// void forgotPassword(String phone, String newPassword);
+
 }
