@@ -26,7 +26,7 @@ public class RouteServiceImpl implements IRouteService {
 
     @Override
     public int countActiveRoutes() {
-        return (int) routeRepository.countByStatus(RouteStatus.ACTIVE);
+        return (int) routeRepository.countByStatus(RouteStatus.NOTVALID);
     }
 
     @Override
