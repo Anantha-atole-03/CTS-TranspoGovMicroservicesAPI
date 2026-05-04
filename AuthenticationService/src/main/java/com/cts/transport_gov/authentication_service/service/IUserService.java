@@ -5,6 +5,7 @@ import java.util.List;
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
+import com.cts.transport_gov.authentication_service.model.AuditLog;
 import com.cts.transport_gov.authentication_service.model.User;
 
 public interface IUserService {
@@ -19,4 +20,6 @@ public interface IUserService {
 	UserResponse findByEmail(String email);
 
 	UserResponse findById(Long id);
+
+	List<AuditLog> getAllLogs(Long adminId);
 }
