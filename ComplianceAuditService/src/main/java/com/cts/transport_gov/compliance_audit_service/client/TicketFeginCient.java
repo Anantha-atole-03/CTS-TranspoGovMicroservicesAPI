@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cts.transport_gov.compliance_audit_service.dto.TicketResponse;
 
-@FeignClient(name = "TICKETFARESERVICE", path = "/ticket")
+@FeignClient(name = "TicketFareService", fallback = TicketFeignFallback.class, path = "/ticket")
 public interface TicketFeginCient {
 
 	@GetMapping("/{ticketId}")

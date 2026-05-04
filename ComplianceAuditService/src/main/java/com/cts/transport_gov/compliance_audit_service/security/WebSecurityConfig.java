@@ -62,7 +62,8 @@ public class WebSecurityConfig {
 
 						.requestMatchers(HttpMethod.PATCH, "/audit/update/**").hasRole(GOVERNMENT_AUDITOR)
 
-						.requestMatchers(HttpMethod.DELETE, "/audit/delete/**").hasRole(GOVERNMENT_AUDITOR)
+						.requestMatchers(HttpMethod.DELETE, "/audit/delete/**")
+						.hasAnyRole(ADMINISTRATOR, GOVERNMENT_AUDITOR)
 
 						.requestMatchers(HttpMethod.GET, "/audit/{id}/close").hasRole(GOVERNMENT_AUDITOR)
 

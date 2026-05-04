@@ -5,6 +5,7 @@ import java.util.List;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceCreateRequest;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceUpdate;
+import com.cts.transport_gov.compliance_audit_service.enums.ComplianceType;
 
 public interface IComplianceRecordService {
 	List<ComplianceResponse> findAll();
@@ -22,6 +23,8 @@ public interface IComplianceRecordService {
 	int getComplianceAlerts();
 
 	String create(ComplianceCreateRequest record);
+
+	List<ComplianceResponse> findByType(ComplianceType type);
 
 //	Map<ComplianceResultStatus, Long> getStatusWiseCount();
 
