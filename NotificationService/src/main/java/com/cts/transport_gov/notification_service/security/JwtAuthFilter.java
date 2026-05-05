@@ -18,54 +18,67 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Security filter that executes once per request. It validates that the request
- * comes from API Gateway and sets the authenticated user + authority.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-	private final HandlerExceptionResolver handlerExceptionResolver;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
+            throws ServletException, IOException {
 
-		try {
-			log.info("Incoming request: {}", request.getRequestURI());
+        try {
+            String uri = request.getRequestURI();
+            log.info("Incoming request: {}", uri);
 
-			// ✅ Allow only requests coming from API Gateway
-			if (!"gateway".equals(request.getHeader("X-Internal-Secret"))) {
-				log.warn("Forbidden request: not from gateway");
-				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-				return;
-			}
+            // ✅ ✅ FIX: Allow OTP without gateway / JWT
+            if ("/notification/otp".equals(uri)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-			// ✅ Extract headers added by API Gateway
-			String role = request.getHeader("X-Role"); // ADMINISTRATOR
-			String username = request.getHeader("X-User-Phone"); // phone / username
+            // ✅ Allow swagger
+            if (uri.startsWith("/swagger-ui") || uri.startsWith("/v3/api-docs")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-			log.info("User role from gateway: {}", role);
+            // ✅ Existing gateway protection (UNCHANGED)
+            if (!"gateway".equals(request.getHeader("X-Internal-Secret"))) {
+                log.warn("Forbidden request: not from gateway");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
 
-			// ✅ VERY IMPORTANT PART (THIS FIXES 403)
-			if (role != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // ✅ Extract headers added by API Gateway
+            String role = request.getHeader("X-Role");
+            String username = request.getHeader("X-User-Phone");
 
-				// ✅ DO NOT add ROLE_ prefix because you're using hasAnyAuthority()
-				List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+            log.info("User role from gateway: {}", role);
 
-				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
-						null, authorities);
+            if (role != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-				SecurityContextHolder.getContext().setAuthentication(authentication);
-			}
+                List<GrantedAuthority> authorities =
+                        List.of(new SimpleGrantedAuthority(role));
 
-			filterChain.doFilter(request, response);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                username, null, authorities);
 
-		} catch (Exception ex) {
-			log.error("JwtAuthFilter exception", ex);
-			handlerExceptionResolver.resolveException(request, response, null, ex);
-		}
-	}
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception ex) {
+            log.error("JwtAuthFilter exception", ex);
+            handlerExceptionResolver.resolveException(request, response, null, ex);
+        }
+    }
 }

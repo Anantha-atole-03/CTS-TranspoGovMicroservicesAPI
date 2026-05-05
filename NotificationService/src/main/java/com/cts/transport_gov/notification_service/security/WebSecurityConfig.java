@@ -52,6 +52,8 @@ public class WebSecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/notification/**")
 						.hasAnyAuthority("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "PROGRAM_MANAGER", "ADMINISTRATOR",
 								"COMPLIANCE_OFFICER", "GOVERNMENT_AUDITOR")
+						.requestMatchers("/notification/otp/**").permitAll()
+						.requestMatchers("/notification/**").permitAll()
 
 						.requestMatchers(HttpMethod.PATCH, "/notification/**")
 						.hasAnyAuthority("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "PROGRAM_MANAGER", "ADMINISTRATOR",

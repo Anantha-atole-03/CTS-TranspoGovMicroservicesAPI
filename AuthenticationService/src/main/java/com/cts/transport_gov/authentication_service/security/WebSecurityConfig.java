@@ -67,6 +67,7 @@ public class WebSecurityConfig {
 						.hasAnyRole("ADMINISTRATOR", "CITIZEN_PASSENGER")
 						.requestMatchers(HttpMethod.PUT, "/citizen/{id}")
 						.hasAnyRole("ADMINISTRATOR", "CITIZEN_PASSENGER")
+						.requestMatchers("/notification/**").permitAll()
 
 						// -------- Citizen Role Update --------
 						.requestMatchers(HttpMethod.PUT, "/citizen/{userId}/role").hasRole("ADMINISTRATOR")
@@ -77,7 +78,7 @@ public class WebSecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/citizen-documents/citizen/**")
 						.hasAnyRole("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "ADMINISTRATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/citizen-documents/verify/**")
-						.hasAnyRole("TRANSPORT_OFFICER", "COMPLIANCE_OFFICER")
+						.hasAnyRole("TRANSPORT_OFFICER", "COMPLIANCE_OFFICER","ADMINISTRATOR")
 
 						// -------- User --------
 						.requestMatchers("/users/**").hasRole("ADMINISTRATOR")

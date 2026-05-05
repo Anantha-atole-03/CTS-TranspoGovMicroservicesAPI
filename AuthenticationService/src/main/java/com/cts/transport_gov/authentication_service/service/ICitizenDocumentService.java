@@ -5,6 +5,7 @@ import java.util.List;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentResponse;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentVerifyRequest;
+import com.cts.transport_gov.authentication_service.dto.DocumentUploadReq;
 
 public interface ICitizenDocumentService {
 	CitizenDocumentResponse verifyDocument(Long documentId, CitizenDocumentVerifyRequest request);
@@ -13,6 +14,9 @@ public interface ICitizenDocumentService {
 
 	List<CitizenDocumentResponse> getDocumentsByCitizen(Long citizenId);
 
-	CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
-			String verificationStatus);
+	// CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request,
+	// String filePath,
+	//String verificationStatus);
+
+	String upload(DocumentUploadReq req);
 }

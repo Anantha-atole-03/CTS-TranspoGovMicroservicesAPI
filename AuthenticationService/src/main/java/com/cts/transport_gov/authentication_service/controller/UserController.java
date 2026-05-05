@@ -9,16 +9,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
+import com.cts.transport_gov.authentication_service.model.AuditLog;
 import com.cts.transport_gov.authentication_service.model.User;
 import com.cts.transport_gov.authentication_service.service.IUserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST Controller for managing User accounts and authentication details.
@@ -27,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/users")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
 	private final IUserService userService;
@@ -91,4 +95,9 @@ public class UserController {
 		return ResponseEntity.ok(userService.findByEmail(email));
 
 	}
+	@GetMapping("/logs")
+    public ResponseEntity<List<AuditLog>> getLogs(@RequestHeader("admin-id") Long adminId) {
+        log.info("Audit logs requested by admin ID: {}", adminId);
+        return ResponseEntity.ok(userService.getAllLogs(adminId));
+    }
 }

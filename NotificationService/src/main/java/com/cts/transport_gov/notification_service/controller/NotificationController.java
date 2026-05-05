@@ -128,11 +128,22 @@ public class NotificationController {
 	}
 
 	@PostMapping("/otp")
-	public ResponseEntity<String> sendOtpNotification(@RequestBody OtpNotificationRequest request) {
+	public ResponseEntity<String> sendOtpNotification(
+	        @RequestBody OtpNotificationRequest request) {
 
-		notificationService.sendOtpNotification(request.getEmail(), request.getOtp());
+	    try {
+	        notificationService.sendOtpNotification(
+	            request.getEmail(),
+	            request.getOtp()
+	        );
+	        return ResponseEntity.ok("OTP notification sent");
 
-		return ResponseEntity.ok("OTP notification sent");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity
+	            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .body(e.getMessage());
+	    }
 	}
 
 }

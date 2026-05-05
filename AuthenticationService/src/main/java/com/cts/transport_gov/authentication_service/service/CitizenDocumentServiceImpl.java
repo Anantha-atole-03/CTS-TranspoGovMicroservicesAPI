@@ -1,27 +1,28 @@
 package com.cts.transport_gov.authentication_service.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentResponse;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentVerifyRequest;
+import com.cts.transport_gov.authentication_service.dto.DocumentUploadReq;
 import com.cts.transport_gov.authentication_service.enums.DocumentVerificationStatus;
+import com.cts.transport_gov.authentication_service.model.AuditLog;
 import com.cts.transport_gov.authentication_service.model.Citizen;
 import com.cts.transport_gov.authentication_service.model.CitizenDocument;
+import com.cts.transport_gov.authentication_service.respository.AuditLogRepository;
 import com.cts.transport_gov.authentication_service.respository.CitizenDocumentRepository;
 import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Service implementation for managing citizen documents. Handles the logic for
- * uploading, retrieving, and verifying physical and digital documents.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -29,87 +30,88 @@ public class CitizenDocumentServiceImpl implements ICitizenDocumentService {
 
 	private final CitizenDocumentRepository citizenDocumentRepository;
 	private final CitizenRepository citizenRepository;
+	private final AuditLogRepository auditLogRepository;
 
-	/**
-	 * Links a file path to a citizen and persists document metadata. * @param
-	 * request DTO containing citizen ID and document type.
-	 * 
-	 * @param filePath           The server-side path where the file is stored.
-	 * @param verificationStatus The initial status (e.g., PENDING).
-	 * @return Response DTO with the saved document details.
-	 * @throws RuntimeException if the associated citizen does not exist.
-	 */
+	// ===================== FILE UPLOAD FLOW =====================
+
+//	@Override
+//	@Transactional
+//	public CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
+//			String verificationStatus) {
+//
+//		log.info("Uploading document for citizenId={}", request.getCitizenId());
+//
+//		Citizen citizen = citizenRepository.findById(request.getCitizenId())
+//				.orElseThrow(() -> new RuntimeException("Citizen not found"));
+//
+//		CitizenDocument document = CitizenDocument.builder().citizen(citizen).docType(request.getDocType())
+//				.fileURI(filePath).uploadedDate(LocalDate.now())
+//				.verificationStatus(DocumentVerificationStatus.valueOf(verificationStatus.toUpperCase())).build();
+//
+//		CitizenDocument saved = citizenDocumentRepository.save(document);
+//
+//		auditLogRepository.save(AuditLog.builder().userId(citizen.getCitizenId()).action("DOCUMENT_UPLOAD")
+//				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
+//
+//		return mapToResponse(saved);
+//	}
+
+	
+
 	@Override
-	public CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
-			String verificationStatus) {
+	@Transactional
+	public String upload(DocumentUploadReq req) {
 
-		log.info("Uploading document for citizenId={}", request.getCitizenId());
+		log.info("Processing JSON document upload for citizenId={}", req != null ? req.getCitizenId() : "NULL");
 
-		// Verify that the citizen exists before attaching a document
-		Citizen citizen = citizenRepository.findById(request.getCitizenId())
+		if (req == null || req.getCitizenId() == null) {
+			throw new IllegalArgumentException("Request body or citizenId cannot be null");
+		}
+
+		Citizen citizen = citizenRepository.findById(req.getCitizenId())
 				.orElseThrow(() -> new RuntimeException("Citizen not found"));
 
-		// Build the entity using the provided file path and current system date
-		CitizenDocument document = CitizenDocument.builder().citizen(citizen).docType(request.getDocType())
-				.fileURI(filePath).uploadedDate(LocalDate.now())
-				.verificationStatus(DocumentVerificationStatus.valueOf(verificationStatus)).build();
+		CitizenDocument doc = CitizenDocument.builder().citizen(citizen).docType(req.getDocType())
+				.fileURI(req.getFileUri()).uploadedDate(LocalDate.now())
+				.verificationStatus(DocumentVerificationStatus.PENDING).build();
 
-		CitizenDocument saved = citizenDocumentRepository.save(document);
-		return mapToResponse(saved);
+		citizenDocumentRepository.save(doc);
+
+		auditLogRepository.save(AuditLog.builder().userId(req.getCitizenId()).action("DOCUMENT_UPLOAD_JSON")
+				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
+
+		return "Document uploaded successfully for Citizen ID: " + req.getCitizenId();
 	}
 
-	/**
-	 * Updates the verification status of an existing document. * @param documentId
-	 * The unique ID of the document.
-	 * 
-	 * @param request DTO containing the new status.
-	 * @return Updated document details.
-	 */
+	// ===================== VERIFY =====================
+
 	@Override
+	@Transactional
 	public CitizenDocumentResponse verifyDocument(Long documentId, CitizenDocumentVerifyRequest request) {
 
 		CitizenDocument document = citizenDocumentRepository.findById(documentId)
 				.orElseThrow(() -> new RuntimeException("Document not found"));
 
-		// Update the status based on the reviewer's input
 		document.setVerificationStatus(request.getVerificationStatus());
-
-		CitizenDocument updated = citizenDocumentRepository.save(document);
-		return mapToResponse(updated);
+		return mapToResponse(citizenDocumentRepository.save(document));
 	}
 
-	/**
-	 * Fetches a single document's metadata by ID. * @param documentId The
-	 * document's primary key.
-	 * 
-	 * @return Document response DTO.
-	 */
+	// ===================== RETRIEVAL =====================
+
 	@Override
 	public CitizenDocumentResponse getDocument(Long documentId) {
-		CitizenDocument document = citizenDocumentRepository.findById(documentId)
+		return citizenDocumentRepository.findById(documentId).map(this::mapToResponse)
 				.orElseThrow(() -> new RuntimeException("Document not found"));
-
-		return mapToResponse(document);
 	}
 
-	/**
-	 * Retrieves all documents belonging to a specific citizen. * @param citizenId
-	 * The ID of the citizen.
-	 * 
-	 * @return A list of document response objects.
-	 */
 	@Override
 	public List<CitizenDocumentResponse> getDocumentsByCitizen(Long citizenId) {
 		return citizenDocumentRepository.findByCitizen_CitizenId(citizenId).stream().map(this::mapToResponse)
 				.collect(Collectors.toList());
 	}
 
-	/**
-	 * Utility method to transform a CitizenDocument entity into a
-	 * CitizenDocumentResponse DTO. * @param doc The source entity.
-	 * 
-	 * @return The target DTO.
-	 */
+	// ===================== MAPPER =====================
+
 	private CitizenDocumentResponse mapToResponse(CitizenDocument doc) {
 		CitizenDocumentResponse res = new CitizenDocumentResponse();
 		res.setDocumentId(doc.getDocumentId());
