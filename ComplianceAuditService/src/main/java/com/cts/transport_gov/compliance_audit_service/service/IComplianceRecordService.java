@@ -22,6 +22,8 @@ public interface IComplianceRecordService {
 
 	int getComplianceAlerts();
 
+//	void sendComplianceNotification(ComplianceRecord record);
+
 	String create(ComplianceCreateRequest record);
 
 	List<ComplianceResponse> findByType(ComplianceType type);

@@ -353,17 +353,12 @@ public class NotificationService implements INotificationService {
 
 		log.info("System generated Compliance alert for email={}", email);
 
-		// ✅ Validate user exists via Feign (no DB access)
-		userServiceClient.getUserByEmail(email);
-
-		// ✅ Build notification WITHOUT User entity
 		Notification notification = Notification.builder().message(entity).category(NotificationCategory.COMPLIANCE)
-				.status(NotificationStatus.UNREAD).build();
+				.status(NotificationStatus.UNREAD).scope(NotificationScope.USER).build();
 
 		notificationRepository.save(notification);
 
-		// ✅ Email without User entity dependency
-		String emailContent = MailTemplates.getComplianceAlertTemplate("User", entity);
+		String emailContent = MailTemplates.getComplianceAlertTemplate("Compliance Officer", entity);
 
 		sendEmail(email, "Compliance Alert", emailContent);
 	}
