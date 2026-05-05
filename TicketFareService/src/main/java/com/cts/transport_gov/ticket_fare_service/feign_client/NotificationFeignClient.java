@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "NOTIFICATIONSERVICE", fallback = NotificationFeignFallback.class)
+@FeignClient(name = "NOTIFICATIONSERVICE", fallback = NotificationFeignFallback.class, path = "notification")
 public interface NotificationFeignClient {
 	@PostMapping("/notification/ticket")
 	ResponseEntity<?> sendBookNotification(@RequestBody Long id);
