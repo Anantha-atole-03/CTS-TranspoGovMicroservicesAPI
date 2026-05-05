@@ -8,11 +8,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.cts.transport_gov.compliance_audit_service.client.NotificationFeignClient;
 import com.cts.transport_gov.compliance_audit_service.client.ProgramFeignClient;
 import com.cts.transport_gov.compliance_audit_service.client.RouteFeignClient;
 import com.cts.transport_gov.compliance_audit_service.client.TicketFeginCient;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceCreateRequest;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceEntityResponseDto;
+import com.cts.transport_gov.compliance_audit_service.dto.ComplianceNotificationRequest;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceUpdate;
 import com.cts.transport_gov.compliance_audit_service.dto.ProgramResponse;
@@ -40,17 +42,13 @@ public class ComplianceRecordService implements IComplianceRecordService {
 	private final RouteFeignClient routeFeignClient;
 	private final TicketFeginCient ticketFeignClient;
 	private final ProgramFeignClient programFeignClient;
+	private final NotificationFeignClient notificationFeignClient;
 
 	@Override
 	public List<ComplianceResponse> findAll() {
 		log.info("Fetching all compliance records");
 		return repository.findAll().stream().map(record -> {
 			ComplianceResponse complianceResponse = modelMapper.map(record, ComplianceResponse.class);
-			try {
-				complianceResponse.setEntityData(validateEntity(record.getType(), record.getEntityId()));
-			} catch (Throwable ex) {
-				complianceResponse.setEntityData(null);
-			}
 
 			return complianceResponse;
 		}).collect(Collectors.toList());
@@ -70,7 +68,6 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		}
 
 		ComplianceResponse response = modelMapper.map(complianceRecord, ComplianceResponse.class);
-		response.setEntityData(complianceEntityResponseDto);
 		return response;
 	}
 
@@ -95,14 +92,32 @@ public class ComplianceRecordService implements IComplianceRecordService {
 
 		ComplianceRecord existing = repository.findById(id)
 				.orElseThrow(() -> new ComplianceNotFoundException("Compliance Record not found"));
+
 		validateEntity(existing.getType(), existing.getEntityId());
 
-//		existing.setType(existing.getType());
 		existing.setResult(record.getResult());
 		existing.setNotes(record.getNotes());
-//		existing.setEntityId(existing.getEntityId());
 
-		return modelMapper.map(repository.save(existing), ComplianceResponse.class);
+		ComplianceRecord saved = repository.save(existing);
+
+		if (saved.getResult() == ComplianceResultStatus.FAIL) {
+
+			ComplianceNotificationRequest notificationRequest = new ComplianceNotificationRequest();
+			notificationRequest.setEmail("compliance.officer@transpogov.com");
+			notificationRequest
+					.setEntity("Compliance FAILED for " + saved.getType() + " with Entity ID: " + saved.getEntityId());
+
+			// ✅ NON-BLOCKING background notification
+			new Thread(() -> {
+				try {
+					notificationFeignClient.sendComplianceNotification(notificationRequest);
+				} catch (Exception ex) {
+					log.error("Notification failed", ex);
+				}
+			}).start();
+		}
+
+		return modelMapper.map(saved, ComplianceResponse.class);
 	}
 
 	@Override
@@ -131,7 +146,6 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		return records.stream().map(record -> {
 
 			ComplianceResponse complianceResponse = modelMapper.map(record, ComplianceResponse.class);
-			complianceResponse.setEntityData(validateEntity(record.getType(), record.getEntityId()));
 			return complianceResponse;
 		}).collect(Collectors.toList());
 	}
