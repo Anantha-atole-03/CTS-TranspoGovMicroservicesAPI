@@ -6,14 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cts.transport_gov.compliance_audit_service.dto.ApiResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceCreateRequest;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceUpdate;
@@ -22,46 +21,43 @@ import com.cts.transport_gov.compliance_audit_service.service.ComplianceRecordSe
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/compliances")
+@RequestMapping("/compliance")
 @RequiredArgsConstructor
+
 public class ComplianceRecordController {
 
 	private final ComplianceRecordService service;
 
 	@GetMapping("/")
-	public ResponseEntity<ApiResponse<List<ComplianceResponse>>> getAll() {
-		List<ComplianceResponse> data = service.findAll();
-		return ResponseEntity
-				.ok(new ApiResponse<List<ComplianceResponse>>("Records fetched!", HttpStatus.OK.value(), data));
+	public ResponseEntity<List<ComplianceResponse>> getAll() {
+
+		return ResponseEntity.ok(service.findAll());
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<ComplianceResponse>> getById(@PathVariable Long id) {
-		ComplianceResponse data = service.findById(id);
-		return ResponseEntity.ok(new ApiResponse<>("Record fetched!", HttpStatus.OK.value(), data));
+	public ResponseEntity<ComplianceResponse> getById(@PathVariable Long id) {
+
+		return ResponseEntity.ok(service.findById(id));
 	}
 
 	@PostMapping("/save")
-	public ResponseEntity<ApiResponse<String>> create(@RequestBody ComplianceCreateRequest body) {
-		String message = service.create(body);
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ApiResponse<>(message, HttpStatus.CREATED.value(), null));
+	public ResponseEntity<String> create(@RequestBody ComplianceCreateRequest body) {
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(service.create(body));
 	}
 
-	@PatchMapping("/update/{id}")
-	public ResponseEntity<ApiResponse<ComplianceResponse>> update(@PathVariable Long id,
-			@RequestBody ComplianceUpdate body) {
-		ComplianceResponse updated = service.update(id, body);
-		return ResponseEntity.ok(new ApiResponse<>("Record updated successfully", HttpStatus.OK.value(), updated));
+	@PutMapping("/update/{id}")
+	public ResponseEntity<ComplianceResponse> update(@PathVariable Long id, @RequestBody ComplianceUpdate body) {
+
+		return ResponseEntity.ok(service.update(id, body));
 	}
 
 	/*
 	 * DELETE /compliances/delete/id
 	 */
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long id) {
-		String message = service.delete(id);
-		return ResponseEntity.ok(new ApiResponse<>(message, HttpStatus.OK.value(), null));
+	public ResponseEntity<String> delete(@PathVariable Long id) {
+		return ResponseEntity.ok(service.delete(id));
 	}
 
 	/*
@@ -69,16 +65,26 @@ public class ComplianceRecordController {
 	 * 
 	 */
 	@GetMapping("/getByEntity/{entityId}")
-	public ResponseEntity<ApiResponse<List<ComplianceResponse>>> findByEntityId(
-			@PathVariable("entityId") Long entityId) {
-		List<ComplianceResponse> list = service.findByEntityId(entityId);
-		return ResponseEntity.ok(new ApiResponse<>("Records fetched by entityId!", HttpStatus.OK.value(), list));
+	public ResponseEntity<List<ComplianceResponse>> findByEntityId(@PathVariable Long entityId) {
+
+		return ResponseEntity.ok(service.findByEntityId(entityId));
 	}
+
 //
+//	@GetMapping("/by-type/{type}")
+//	public ResponseEntity<List<ComplianceResponse>> getByType(@PathVariable("type") ComplianceType type) {
+//		return ResponseEntity.ok(service.findByType(type));
+//	}
+
 //	@GetMapping("/summary")
 //	public ResponseEntity<ApiResponse<?>> getCount() {
 //		return ResponseEntity
 //				.ok(new ApiResponse<>("Count fetched!", HttpStatus.OK.value(), service.getStatusWiseCount()));
 //	}
+
+	@GetMapping("/summary")
+	public ResponseEntity<?> getCount() {
+		return ResponseEntity.ok(service.getCount());
+	}
 
 }

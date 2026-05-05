@@ -64,7 +64,7 @@ public class AuditService implements IAuditService {
 		log.info("Creating audit for officerId: {}", req.getOfficerId());
 
 		// ✅ Fetch officer via Feign client
-		ResponseEntity<UserResponse> officer = entityFeignClient.getUserById(req.getOfficerId());
+		ResponseEntity<UserResponse> officer = entityFeignClient.getuser(req.getOfficerId());
 
 		if (officer == null) {
 			throw new AuditNotFoundException("Aduit officer not found with id: " + req.getOfficerId());
@@ -74,7 +74,7 @@ public class AuditService implements IAuditService {
 		Audit audit = modelMapper.map(req, Audit.class);
 
 		// ✅ Explicit business logic
-		audit.setOfficer(officer.getBody().getUserId());// store ONLY the ID (best practice)
+		audit.setOfficer_id(officer.getBody().getUserId());// store ONLY the ID (best practice)
 		audit.setStatus(AuditStatus.OPEN);
 		audit.setStartedAt(LocalDateTime.now());
 
@@ -192,8 +192,6 @@ public class AuditService implements IAuditService {
 	/* ---------------- HELPER ---------------- */
 
 	private AuditResponse toAuditResponse(Audit audit) {
-
-		// ✅ ModelMapper used (entity → response)
 		AuditResponse dto = modelMapper.map(audit, AuditResponse.class);
 		return dto;
 	}

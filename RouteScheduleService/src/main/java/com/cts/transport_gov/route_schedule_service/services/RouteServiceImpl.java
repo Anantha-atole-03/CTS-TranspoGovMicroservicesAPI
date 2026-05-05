@@ -1,70 +1,94 @@
 package com.cts.transport_gov.route_schedule_service.services;
 
-import com.cts.transport_gov.route_schedule_service.dtos.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cts.transport_gov.route_schedule_service.dtos.RouteCreateRequest;
+import com.cts.transport_gov.route_schedule_service.dtos.RouteResponse;
+import com.cts.transport_gov.route_schedule_service.dtos.RouteUpdateRequest;
 import com.cts.transport_gov.route_schedule_service.enums.RouteStatus;
 import com.cts.transport_gov.route_schedule_service.exceptions.RouteNotFoundException;
 import com.cts.transport_gov.route_schedule_service.models.Route;
 import com.cts.transport_gov.route_schedule_service.repository.RouteRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RouteServiceImpl implements IRouteService {
 
-    private final ModelMapper modelMapper;
-    private final RouteRepository routeRepository;
+	private final RouteRepository routeRepository;
 
-    @Override
-    public RouteResponse addRoute(RouteCreateRequest routeRequest) {
-        Route route = modelMapper.map(routeRequest, Route.class);
-        Route saved = routeRepository.save(route);
-        return modelMapper.map(saved, RouteResponse.class);
-    }
+	@Override
+	public int countActiveRoutes() {
+		return (int) routeRepository.countByStatus(RouteStatus.INACTIVE);
+	}
 
-    @Override
-    public RouteResponse updateRoute(Long id, RouteUpdateRequest routeRequest) {
-        Route existing = routeRepository.findById(id)
-                .orElseThrow(() -> new RouteNotFoundException("Route not found with id: " + id));
-        
-        existing.setTitle(routeRequest.getTitle());
-        existing.setType(routeRequest.getType());
-        existing.setStartPoint(routeRequest.getStartPoint());
-        existing.setEndPoint(routeRequest.getEndPoint());
-        existing.setStatus(routeRequest.getStatus());
+	@Override
+	public RouteResponse addRoute(RouteCreateRequest request) {
+		Route route = new Route();
+		route.setTitle(request.getTitle());
+		route.setType(request.getType());
+		route.setStartPoint(request.getStartPoint());
+		route.setEndPoint(request.getEndPoint());
+		route.setStatus(request.getStatus());
 
-        return modelMapper.map(routeRepository.save(existing), RouteResponse.class);
-    }
+		Route saved = routeRepository.save(route);
+		return toResponse(saved);
+	}
 
-    @Override
-    public List<RouteResponse> getAllRoutes() {
-        return routeRepository.findAll().stream()
-                .map(r -> modelMapper.map(r, RouteResponse.class)).toList();
-    }
+	@Override
+	public RouteResponse updateRoute(Long id, RouteUpdateRequest request) {
+		Route existing = routeRepository.findById(id)
+				.orElseThrow(() -> new RouteNotFoundException("Route ID " + id + " not found"));
 
-    @Override
-    public RouteResponse getRouteById(Long id) {
-        Route route = routeRepository.findById(id)
-                .orElseThrow(() -> new RouteNotFoundException("Route not found with id: " + id));
-        return modelMapper.map(route, RouteResponse.class);
-    }
+		existing.setTitle(request.getTitle());
+		existing.setType(request.getType());
+		existing.setStartPoint(request.getStartPoint());
+		existing.setEndPoint(request.getEndPoint());
+		existing.setStatus(request.getStatus());
 
-    @Override
-    public void deleteRoute(Long id) {
-        if (!routeRepository.existsById(id)) throw new RouteNotFoundException("Route ID " + id + " not found");
-        routeRepository.deleteById(id);
-    }
+		Route saved = routeRepository.save(existing);
+		return toResponse(saved);
+	}
 
-    @Override
-    public List<RouteResponse> getRoutesByType(String type) {
-        return routeRepository.findByType(type).stream()
-                .map(r -> modelMapper.map(r, RouteResponse.class)).toList();
-    }
+	@Override
+	public List<RouteResponse> getAllRoutes() {
+		return routeRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+	}
 
-    @Override
-    public int countActiveRoutes() {
-        return routeRepository.countByStatus(RouteStatus.ACTIVE);
-    }
+	@Override
+	public RouteResponse getRouteById(Long id) {
+		Route route = routeRepository.findById(id)
+				.orElseThrow(() -> new RouteNotFoundException("Route ID " + id + " not found"));
+		return toResponse(route);
+	}
+
+	@Override
+	public void deleteRoute(Long id) {
+		if (!routeRepository.existsById(id)) {
+			throw new RouteNotFoundException("Route ID " + id + " not found");
+		}
+		routeRepository.deleteById(id);
+	}
+
+	@Override
+	public List<RouteResponse> getRoutesByType(String type) {
+		return routeRepository.findByType(type).stream().map(this::toResponse).collect(Collectors.toList());
+	}
+
+	private RouteResponse toResponse(Route route) {
+		RouteResponse response = new RouteResponse();
+		response.setRouteId(route.getRouteId());
+		response.setTitle(route.getTitle());
+		response.setType(route.getType());
+		response.setStartPoint(route.getStartPoint());
+		response.setEndPoint(route.getEndPoint());
+		response.setStatus(route.getStatus());
+		return response;
+	}
 }

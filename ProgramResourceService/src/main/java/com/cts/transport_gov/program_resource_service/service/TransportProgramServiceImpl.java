@@ -164,8 +164,8 @@ public class TransportProgramServiceImpl implements ITransportProgramService {
 	}
 
 	@Override
-	public double calculateEfficiency() {
-		return 87.5; // placeholder logic
+	public int programCount() {
+		return (int) programRepository.count();
 	}
 
 }

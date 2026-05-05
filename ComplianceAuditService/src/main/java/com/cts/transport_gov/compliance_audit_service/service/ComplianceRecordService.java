@@ -1,5 +1,6 @@
 package com.cts.transport_gov.compliance_audit_service.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -7,11 +8,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.cts.transport_gov.compliance_audit_service.client.NotificationFeignClient;
 import com.cts.transport_gov.compliance_audit_service.client.ProgramFeignClient;
 import com.cts.transport_gov.compliance_audit_service.client.RouteFeignClient;
 import com.cts.transport_gov.compliance_audit_service.client.TicketFeginCient;
-import com.cts.transport_gov.compliance_audit_service.dto.ApiResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceCreateRequest;
+import com.cts.transport_gov.compliance_audit_service.dto.ComplianceEntityResponseDto;
+import com.cts.transport_gov.compliance_audit_service.dto.ComplianceNotificationRequest;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceResponse;
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceUpdate;
 import com.cts.transport_gov.compliance_audit_service.dto.ProgramResponse;
@@ -39,12 +42,16 @@ public class ComplianceRecordService implements IComplianceRecordService {
 	private final RouteFeignClient routeFeignClient;
 	private final TicketFeginCient ticketFeignClient;
 	private final ProgramFeignClient programFeignClient;
+	private final NotificationFeignClient notificationFeignClient;
 
 	@Override
 	public List<ComplianceResponse> findAll() {
 		log.info("Fetching all compliance records");
-		return repository.findAll().stream().map(record -> modelMapper.map(record, ComplianceResponse.class))
-				.collect(Collectors.toList());
+		return repository.findAll().stream().map(record -> {
+			ComplianceResponse complianceResponse = modelMapper.map(record, ComplianceResponse.class);
+
+			return complianceResponse;
+		}).collect(Collectors.toList());
 	}
 
 	@Override
@@ -53,31 +60,15 @@ public class ComplianceRecordService implements IComplianceRecordService {
 
 		ComplianceRecord complianceRecord = repository.findById(id)
 				.orElseThrow(() -> new ComplianceNotFoundException("Compliance Record not found"));
-
-		// ✅ Feign call for validation / enrichment (no try-catch)
-		if (complianceRecord.getType() == ComplianceType.ROUTE) {
-
-			ResponseEntity<ApiResponse<RouteResponse>> route = routeFeignClient
-					.getRouteById(complianceRecord.getEntityId());
-			if (route == null || !route.hasBody()) {
-				throw new RouteNotFoundException("Route Record not found");
-			}
-
-		} else if (complianceRecord.getType() == ComplianceType.TICKET) {
-
-			ResponseEntity<TicketResponse> ticket = ticketFeignClient.getTicketById(complianceRecord.getEntityId());
-			if (ticket == null || !ticket.hasBody()) {
-				throw new TicketNotFoundException("Ticket Record not found");
-			}
-		} else if (complianceRecord.getType() == ComplianceType.PROGRAM) {
-			ResponseEntity<ApiResponse<ProgramResponse>> program = programFeignClient
-					.getProgramById(complianceRecord.getEntityId());
-			if (program == null || !program.hasBody()) {
-				throw new ProgramNotFoundException("Ticket Record not found");
-			}
+		ComplianceEntityResponseDto complianceEntityResponseDto = null;
+		try {
+			complianceEntityResponseDto = validateEntity(complianceRecord.getType(), complianceRecord.getEntityId());
+		} catch (Throwable ex) {
+			complianceEntityResponseDto = null;
 		}
 
-		return modelMapper.map(complianceRecord, ComplianceResponse.class);
+		ComplianceResponse response = modelMapper.map(complianceRecord, ComplianceResponse.class);
+		return response;
 	}
 
 	@Override
@@ -85,26 +76,12 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		log.info("Creating compliance record with type: {}", record.getType());
 
 		// ✅ Feign validation BEFORE save (no try-catch)
-		if (record.getType() == ComplianceType.ROUTE) {
+		validateEntity(record.getType(), record.getEntityId());
 
-			ResponseEntity<ApiResponse<RouteResponse>> route = routeFeignClient.getRouteById(record.getEntityId());
-			if (route == null || !route.hasBody()) {
-				throw new RouteNotFoundException("Route Record not found");
-			}
-		} else if (record.getType() == ComplianceType.TICKET) {
-			ResponseEntity<TicketResponse> ticket = ticketFeignClient.getTicketById(record.getEntityId());
-			if (ticket == null || !ticket.hasBody()) {
-				throw new TicketNotFoundException("Ticket Record not found");
-			}
-		} else if (record.getType() == ComplianceType.PROGRAM) {
-			ResponseEntity<ApiResponse<ProgramResponse>> program = programFeignClient
-					.getProgramById(record.getEntityId());
-			if (program == null || !program.hasBody()) {
-				throw new ProgramNotFoundException("Ticket Record not found");
-			}
-		}
+		ComplianceRecord entity = modelMapper.map(record, ComplianceRecord.class);
+		entity.setComplianceDate(LocalDate.now());
 
-		ComplianceRecord saved = repository.save(modelMapper.map(record, ComplianceRecord.class));
+		ComplianceRecord saved = repository.save(entity);
 
 		log.info("Compliance record created with id: {}", saved.getComplianceId());
 		return "Record Saved successsfully";
@@ -116,32 +93,31 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		ComplianceRecord existing = repository.findById(id)
 				.orElseThrow(() -> new ComplianceNotFoundException("Compliance Record not found"));
 
-		// ✅ Feign validation during update
-		if (existing.getType() == ComplianceType.ROUTE) {
+		validateEntity(existing.getType(), existing.getEntityId());
 
-			ResponseEntity<ApiResponse<RouteResponse>> route = routeFeignClient.getRouteById(existing.getEntityId());
-			if (route == null || !route.hasBody()) {
-				throw new RouteNotFoundException("Route Record not found");
-			}
-		} else if (existing.getType() == ComplianceType.TICKET) {
-			ResponseEntity<TicketResponse> ticket = ticketFeignClient.getTicketById(existing.getEntityId());
-			if (ticket == null || !ticket.hasBody()) {
-				throw new TicketNotFoundException("Ticket Record not found");
-			}
-		} else if (existing.getType() == ComplianceType.PROGRAM) {
-			ResponseEntity<ApiResponse<ProgramResponse>> program = programFeignClient
-					.getProgramById(existing.getEntityId());
-			if (program == null || !program.hasBody()) {
-				throw new ProgramNotFoundException("Ticket Record not found");
-			}
-		}
-
-		existing.setType(existing.getType());
 		existing.setResult(record.getResult());
 		existing.setNotes(record.getNotes());
-		existing.setEntityId(existing.getEntityId());
 
-		return modelMapper.map(repository.save(existing), ComplianceResponse.class);
+		ComplianceRecord saved = repository.save(existing);
+
+		if (saved.getResult() == ComplianceResultStatus.FAIL) {
+
+			ComplianceNotificationRequest notificationRequest = new ComplianceNotificationRequest();
+			notificationRequest.setEmail("compliance.officer@transpogov.com");
+			notificationRequest
+					.setEntity("Compliance FAILED for " + saved.getType() + " with Entity ID: " + saved.getEntityId());
+
+			// ✅ NON-BLOCKING background notification
+			new Thread(() -> {
+				try {
+					notificationFeignClient.sendComplianceNotification(notificationRequest);
+				} catch (Exception ex) {
+					log.error("Notification failed", ex);
+				}
+			}).start();
+		}
+
+		return modelMapper.map(saved, ComplianceResponse.class);
 	}
 
 	@Override
@@ -167,6 +143,25 @@ public class ComplianceRecordService implements IComplianceRecordService {
 			throw new ComplianceNotFoundException("No compliance records found for entityId: " + entityId);
 		}
 
+		return records.stream().map(record -> {
+
+			ComplianceResponse complianceResponse = modelMapper.map(record, ComplianceResponse.class);
+			return complianceResponse;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ComplianceResponse> findByType(ComplianceType type) {
+
+		log.info("Fetching compliance records by type: {}", type);
+
+		List<ComplianceRecord> records = repository.findByType(type);
+
+		if (records.isEmpty()) {
+			log.warn("No compliance records found for type: {}", type);
+			throw new ComplianceNotFoundException("No compliance records found for type: " + type);
+		}
+
 		return records.stream().map(record -> modelMapper.map(record, ComplianceResponse.class))
 				.collect(Collectors.toList());
 	}
@@ -179,5 +174,33 @@ public class ComplianceRecordService implements IComplianceRecordService {
 	@Override
 	public int getComplianceAlerts() {
 		return repository.countByResult(ComplianceResultStatus.FAIL);
+	}
+
+	ComplianceEntityResponseDto validateEntity(ComplianceType type, Long entityId) {
+
+		if (type.equals(ComplianceType.ROUTE)) {
+
+			ResponseEntity<RouteResponse> route = routeFeignClient.getRouteById(entityId);
+			if (route == null || !route.hasBody()) {
+				throw new RouteNotFoundException("Route Record not found");
+			}
+			return route.getBody();
+
+		} else if (type.equals(ComplianceType.TICKET)) {
+
+			ResponseEntity<TicketResponse> ticket = ticketFeignClient.getTicket(entityId);
+			if (ticket == null || !ticket.hasBody()) {
+				throw new TicketNotFoundException("Ticket Record not found");
+			}
+			return ticket.getBody();
+		} else if (type.equals(ComplianceType.PROGRAM)) {
+			ResponseEntity<ProgramResponse> program = programFeignClient.getProgram(entityId);
+			if (program == null || !program.hasBody()) {
+				throw new ProgramNotFoundException("Program Record not found");
+			}
+			return program.getBody();
+		}
+//		throw new InvaildDataException("Invalid data");
+		return null;
 	}
 }

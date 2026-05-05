@@ -36,6 +36,7 @@ public class ComplianceRecord {
 	private Long complianceId;
 
 	@Column(name = "Date", nullable = false)
+
 	private LocalDate complianceDate;
 
 	@Column(name = "EntityID", nullable = false)

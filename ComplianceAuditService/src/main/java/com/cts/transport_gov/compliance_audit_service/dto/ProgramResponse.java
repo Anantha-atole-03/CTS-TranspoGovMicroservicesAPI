@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProgramResponse {
+public class ProgramResponse implements ComplianceEntityResponseDto {
 	private Long programId;
 	private String title;
 	private String description;
