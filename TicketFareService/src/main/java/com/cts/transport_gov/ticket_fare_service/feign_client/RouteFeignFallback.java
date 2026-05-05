@@ -12,5 +12,6 @@ public class RouteFeignFallback implements RouteFeignClient {
 	@Override
 	public ResponseEntity<RouteResponse> getRouteById(Long id) {
 		throw new ServiceUnavailableException("Route Service Unavailable. Try again later");
+
 	}
 }
