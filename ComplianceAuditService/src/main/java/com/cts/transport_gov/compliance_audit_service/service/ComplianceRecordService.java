@@ -49,11 +49,6 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		log.info("Fetching all compliance records");
 		return repository.findAll().stream().map(record -> {
 			ComplianceResponse complianceResponse = modelMapper.map(record, ComplianceResponse.class);
-			try {
-				complianceResponse.setEntityData(validateEntity(record.getType(), record.getEntityId()));
-			} catch (Throwable ex) {
-				complianceResponse.setEntityData(null);
-			}
 
 			return complianceResponse;
 		}).collect(Collectors.toList());
@@ -73,7 +68,6 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		}
 
 		ComplianceResponse response = modelMapper.map(complianceRecord, ComplianceResponse.class);
-		response.setEntityData(complianceEntityResponseDto);
 		return response;
 	}
 
@@ -152,7 +146,6 @@ public class ComplianceRecordService implements IComplianceRecordService {
 		return records.stream().map(record -> {
 
 			ComplianceResponse complianceResponse = modelMapper.map(record, ComplianceResponse.class);
-			complianceResponse.setEntityData(validateEntity(record.getType(), record.getEntityId()));
 			return complianceResponse;
 		}).collect(Collectors.toList());
 	}

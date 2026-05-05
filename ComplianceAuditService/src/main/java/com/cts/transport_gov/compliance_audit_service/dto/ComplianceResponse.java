@@ -13,7 +13,7 @@ public class ComplianceResponse {
 	private Long complianceId;
 	private LocalDate complianceDate;
 	private Long entityId;
-	private ComplianceEntityResponseDto entityData;
+//	private ComplianceEntityResponseDto entityData;
 	private String notes;
 	private ComplianceResultStatus result;
 	private ComplianceType type;

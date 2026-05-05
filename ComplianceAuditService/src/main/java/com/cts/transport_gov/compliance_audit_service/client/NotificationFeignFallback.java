@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import com.cts.transport_gov.compliance_audit_service.dto.ComplianceNotificationRequest;
-import com.cts.transport_gov.compliance_audit_service.exceptions.ServiceUnavailableException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +14,7 @@ public class NotificationFeignFallback implements NotificationFeignClient {
 	@Override
 	public ResponseEntity<String> sendComplianceNotification(ComplianceNotificationRequest request) {
 
-		log.error("Notification Service is DOWN");
-		throw new ServiceUnavailableException("Notification Service Unavailable. Try again later");
+		log.warn("Notification Service unavailable. Skipping notification for now.");
+		return ResponseEntity.ok("Notification skipped");
 	}
 }
