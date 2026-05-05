@@ -61,13 +61,17 @@ public class UserService implements IUserService {
 		User savedUser = userRepository.save(user);
 
 		log.warn("Password: {} for user: {}", requestDto.getPhone(), password);
-		
+
 		OtpNotificationRequest otp = new OtpNotificationRequest();
 		otp.setEmail(requestDto.getEmail());
 		otp.setOtp(password);
-		
-		client.sendOtpNotification(otp);
-		
+
+		try {
+			client.sendOtpNotification(otp);
+		} catch (Exception e) {
+			log.error("OTP failed, continuing signup", e);
+		}
+
 		// ✅ AUDIT LOG
 		auditLogService.logAction(savedUser.getUserId(), "REGISTER_USER", "IDENTITY");
 
