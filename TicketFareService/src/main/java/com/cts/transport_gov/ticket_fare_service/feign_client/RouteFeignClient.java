@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cts.transport_gov.ticket_fare_service.dto.RouteResponse;
 
-@FeignClient(name = "ROUTESCHEDULESERVICE")
+@FeignClient(name = "ROUTESCHEDULESERVICE", fallback = RouteFeignFallback.class)
 public interface RouteFeignClient {
 	@GetMapping("/route/{id}")
 	ResponseEntity<RouteResponse> getRouteById(@PathVariable("id") Long id);

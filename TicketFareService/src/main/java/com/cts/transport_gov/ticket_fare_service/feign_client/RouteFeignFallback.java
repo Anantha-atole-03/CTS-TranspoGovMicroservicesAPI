@@ -23,5 +23,6 @@ public class RouteFeignFallback implements RouteFeignClient {
 	public ResponseEntity<RouteResponse> getRouteById(Long id) {
 		log.info("Inside Route feign Fallback method");
 		throw new ServiceUnavailableException("Route Service Unavailable. Try again later");
+
 	}
 }
