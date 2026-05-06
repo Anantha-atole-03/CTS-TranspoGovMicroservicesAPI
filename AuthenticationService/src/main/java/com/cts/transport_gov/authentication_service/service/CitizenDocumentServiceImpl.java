@@ -56,8 +56,6 @@ public class CitizenDocumentServiceImpl implements ICitizenDocumentService {
 //		return mapToResponse(saved);
 //	}
 
-	
-
 	@Override
 	@Transactional
 	public String upload(DocumentUploadReq req) {
@@ -81,8 +79,7 @@ public class CitizenDocumentServiceImpl implements ICitizenDocumentService {
 				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
 
 		return "Document uploaded successfully for Citizen ID: " + req.getCitizenId();
-	}
-
+	} 
 	// ===================== VERIFY =====================
 
 	@Override
@@ -108,6 +105,13 @@ public class CitizenDocumentServiceImpl implements ICitizenDocumentService {
 	public List<CitizenDocumentResponse> getDocumentsByCitizen(Long citizenId) {
 		return citizenDocumentRepository.findByCitizen_CitizenId(citizenId).stream().map(this::mapToResponse)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<CitizenDocumentResponse> getAllCitizenDocuments() {
+		List<CitizenDocument> docs = citizenDocumentRepository.findAll();
+
+		return docs.stream().map(this::mapToResponse).toList();
 	}
 
 	// ===================== MAPPER =====================

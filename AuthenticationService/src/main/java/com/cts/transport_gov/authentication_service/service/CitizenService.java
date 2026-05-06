@@ -18,7 +18,8 @@ import com.cts.transport_gov.authentication_service.exceptions.UserAlreadyExists
 import com.cts.transport_gov.authentication_service.model.Citizen;
 import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
 import com.cts.transport_gov.authentication_service.respository.UserRepository;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,8 +92,31 @@ public class CitizenService implements ICitizenService {
 	 */
 	@Override
 	public CitizenResponse getCitizenById(Long id) {
-		Citizen citizen = citizenRepository.findById(id).orElseThrow();
-		return mapper.map(citizen, CitizenResponse.class);
+
+	    // ✅ Get logged-in user
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+	    String loggedInUserPhone = auth.getName(); // assuming phone used as username
+
+	    // ✅ Fetch logged-in citizen
+	    Citizen loggedInCitizen = citizenRepository
+	            .findByPhone(loggedInUserPhone)
+	            .orElseThrow(() -> new RuntimeException("Logged in user not found"));
+
+	    // ✅ ROLE CHECK
+	    if (!loggedInCitizen.getRole().name().equals("ADMINISTRATOR")) {
+
+	        // ✅ If not admin → allow only self access
+	        if (!loggedInCitizen.getCitizenId().equals(id)) {
+	            throw new RuntimeException("Access Denied: You can only view your own profile");
+	        }
+	    }
+
+	    // ✅ Fetch requested citizen
+	    Citizen citizen = citizenRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("Citizen not found"));
+
+	    return mapper.map(citizen, CitizenResponse.class);
 	}
 
 	/**

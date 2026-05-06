@@ -7,10 +7,13 @@ import lombok.Data;
 
 @Data
 public class UserCreateRequest {
+
 	private String name;
 	private UserRole role;
 	private String email;
 	private String phone;
-	private UserStatus status;
 
+	private String password;
+
+	private UserStatus status;
 }

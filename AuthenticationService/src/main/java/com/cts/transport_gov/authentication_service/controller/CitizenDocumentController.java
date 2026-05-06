@@ -69,6 +69,11 @@ public class CitizenDocumentController {
         return citizenDocumentService.getDocument(documentId);
     }
 
+    @GetMapping("/admin/citizens-documents/{adminId}")
+    public List<CitizenDocumentResponse> getAllCitizenDocs() {
+
+        return citizenDocumentService.getAllCitizenDocuments();
+    }
     @GetMapping("/citizen/{citizenId}")
     public List<CitizenDocumentResponse> getByCitizen(
             @PathVariable Long citizenId) {

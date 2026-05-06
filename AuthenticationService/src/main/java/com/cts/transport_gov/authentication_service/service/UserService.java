@@ -43,41 +43,38 @@ public class UserService implements IUserService {
 	@Override
 	public UserResponse save(UserCreateRequest requestDto) {
 
-		Optional<User> exists = userRepository.findByPhone(requestDto.getPhone());
-		if (exists.isPresent() || citizenRepository.findByPhone(requestDto.getPhone()).isPresent()) {
-			throw new AuthenticationException("User already exists");
-		}
+	    // ✅ Check if user already exists
+	    Optional<User> exists = userRepository.findByPhone(requestDto.getPhone());
+	    if (exists.isPresent() || citizenRepository.findByPhone(requestDto.getPhone()).isPresent()) {
+	        throw new AuthenticationException("User already exists");
+	    }
 
-		if (requestDto.getRole().equals(UserRole.CITIZEN_PASSENGER)) {
-			throw new InvalidDataException("Invalid user role! provide correct data");
-		}
+	    // ✅ Validate role
+	    if (requestDto.getRole().equals(UserRole.CITIZEN_PASSENGER)) {
+	        throw new InvalidDataException("Invalid user role! provide correct data");
+	    }
 
-		User user = modelMapper.map(requestDto, User.class);
+	    // ✅ Map request to entity
+	    User user = modelMapper.map(requestDto, User.class);
 
-		String password = generateSixDigitPassword();
-		user.setPassword(passwordEncoder.encode(password));
-		user.setRole(requestDto.getRole());
+	    // ✅ Encode user-provided password
+	    user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+	    user.setRole(requestDto.getRole());
 
-		User savedUser = userRepository.save(user);
+	    // ✅ Save user
+	    User savedUser = userRepository.save(user);
 
-		log.warn("Password: {} for user: {}", requestDto.getPhone(), password);
+	    log.info("User registered successfully with phone: {}", requestDto.getPhone());
 
-		OtpNotificationRequest otp = new OtpNotificationRequest();
-		otp.setEmail(requestDto.getEmail());
-		otp.setOtp(password);
+	    // ✅ AUDIT LOG
+	    auditLogService.logAction(
+	            savedUser.getUserId(),
+	            "REGISTER_USER",
+	            "IDENTITY"
+	    );
 
-		try {
-			client.sendOtpNotification(otp);
-		} catch (Exception e) {
-			log.error("OTP failed, continuing signup", e);
-		}
-
-		// ✅ AUDIT LOG
-		auditLogService.logAction(savedUser.getUserId(), "REGISTER_USER", "IDENTITY");
-
-		return modelMapper.map(savedUser, UserResponse.class);
+	    return modelMapper.map(savedUser, UserResponse.class);
 	}
-
 	@Override
 	public void updateUser(User user, Long userId) {
 
