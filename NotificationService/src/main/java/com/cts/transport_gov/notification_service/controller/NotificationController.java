@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cts.transport_gov.notification_service.dto.AccountPasswordNotificationRequest;
 import com.cts.transport_gov.notification_service.dto.ComplianceNotificationRequest;
 import com.cts.transport_gov.notification_service.dto.NotificationCreateRequest;
 import com.cts.transport_gov.notification_service.dto.NotificationResponse;
@@ -133,6 +134,15 @@ public class NotificationController {
 		notificationService.sendOtpNotification(request.getEmail(), request.getOtp());
 
 		return ResponseEntity.ok("OTP notification sent");
+	}
+
+	@PostMapping("/account/password")
+	public ResponseEntity<String> sendAccountPassword(@RequestBody AccountPasswordNotificationRequest request) {
+
+		notificationService.sendAccountPasswordNotification(request.getEmail(), request.getName(), request.getPhone(),
+				request.getPassword(), request.isCitizen());
+
+		return ResponseEntity.ok("Account password notification sent successfully");
 	}
 
 }

@@ -47,7 +47,8 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// --- Public Endpoints ---
-						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/notification/otp").permitAll()
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/notification/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/notification/otp").permitAll()
 						// --- Notifications ---
 						.requestMatchers(HttpMethod.GET, "/notification/**")
 						.hasAnyAuthority("CITIZEN_PASSENGER", "TRANSPORT_OFFICER", "PROGRAM_MANAGER", "ADMINISTRATOR",

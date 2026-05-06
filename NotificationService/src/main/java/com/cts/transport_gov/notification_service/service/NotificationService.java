@@ -239,11 +239,11 @@ public class NotificationService implements INotificationService {
 
 		log.info("System generated OTP notification for email={}", email);
 
-		try {
-			citizenServiceClient.getCitizenByEmail(email);
-		} catch (FeignException.NotFound e) {
-			throw new RuntimeException("Citizen not found with email");
-		}
+//		try {
+//			citizenServiceClient.getCitizenByEmail(email);
+//		} catch (FeignException.NotFound e) {
+//			throw new RuntimeException("Citizen not found with email");
+//		}
 
 		Notification notification = Notification.builder().message("OTP:" + otp).scope(NotificationScope.CITIZEN)
 				.category(NotificationCategory.OTP).status(NotificationStatus.UNREAD).build();
@@ -353,12 +353,17 @@ public class NotificationService implements INotificationService {
 
 		log.info("System generated Compliance alert for email={}", email);
 
+		// ✅ Validate user exists via Feign (no DB access)
+		userServiceClient.getUserByEmail(email);
+
+		// ✅ Build notification WITHOUT User entity
 		Notification notification = Notification.builder().message(entity).category(NotificationCategory.COMPLIANCE)
-				.status(NotificationStatus.UNREAD).scope(NotificationScope.USER).build();
+				.status(NotificationStatus.UNREAD).build();
 
 		notificationRepository.save(notification);
 
-		String emailContent = MailTemplates.getComplianceAlertTemplate("Compliance Officer", entity);
+		// ✅ Email without User entity dependency
+		String emailContent = MailTemplates.getComplianceAlertTemplate("User", entity);
 
 		sendEmail(email, "Compliance Alert", emailContent);
 	}
@@ -421,5 +426,36 @@ public class NotificationService implements INotificationService {
 
 		// Global Notification for Entire System
 		sendGlobalNotification("System Maintenance Tonight");
+	}
+
+	@Override
+	public void sendAccountPasswordNotification(String email, String name, String phone, String password,
+			boolean isCitizen) {
+
+		log.info("Sending account password notification for email={}", email);
+
+		// ✅ 1. Validate existence using Feign
+		try {
+			if (isCitizen) {
+				citizenServiceClient.getCitizenByEmail(email);
+			} else {
+				userServiceClient.getUserByEmail(email);
+			}
+		} catch (FeignException.NotFound ex) {
+			throw new RuntimeException((isCitizen ? "Citizen" : "User") + " not found with email");
+		}
+
+		// ✅ 2. Save notification
+		Notification notification = Notification.builder().message("Account credentials sent to your registered email.")
+				.category(NotificationCategory.PROGRAM).status(NotificationStatus.UNREAD)
+				.scope(isCitizen ? NotificationScope.CITIZEN : NotificationScope.USER).build();
+
+		notificationRepository.save(notification);
+
+		// ✅ 3. Prepare email template
+		String emailContent = MailTemplates.getUserCreationTemplate(name, phone, password);
+
+		// ✅ 4. Send email
+		sendEmail(email, "Your TranspoGov Account Password", emailContent);
 	}
 }

@@ -32,30 +32,33 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
 					"gateway");
 
 			if (!path.startsWith("/auth")) {
-				log.info("If JwtAuthFilter applied for path: {}", path);
-				String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+				if (!path.startsWith("/notification/otp")) {
 
-				if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-					log.info("JwtAuthFilter not bearer");
-					exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-					return exchange.getResponse().setComplete();
+					log.info("If JwtAuthFilter applied for path: {}", path);
+					String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+					if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+						log.info("JwtAuthFilter not bearer");
+						exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+						return exchange.getResponse().setComplete();
+					}
+
+					Claims claims;
+					try {
+						log.info("JwtAuthFilter Bearer");
+						claims = jwtUtil.validateToken(authHeader.substring(7));
+						log.info("Claims bearer: {}", path);
+					} catch (Exception e) {
+						log.info("Claims bearer exception: {}", e.getMessage());
+						exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+						return exchange.getResponse().setComplete();
+					}
+
+					requestBuilder.header("X-User-Id", claims.get("id").toString())
+							.header("X-User-Phone", claims.getSubject())
+							.header("X-Role", claims.get("role").toString());
 				}
-
-				Claims claims;
-				try {
-					log.info("JwtAuthFilter Bearer");
-					claims = jwtUtil.validateToken(authHeader.substring(7));
-					log.info("Claims bearer: {}", path);
-				} catch (Exception e) {
-					log.info("Claims bearer exception: {}", e.getMessage());
-					exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-					return exchange.getResponse().setComplete();
-				}
-
-				requestBuilder.header("X-User-Id", claims.get("id").toString())
-						.header("X-User-Phone", claims.getSubject()).header("X-Role", claims.get("role").toString());
 			}
-
 			ServerHttpRequest modifiedRequest = requestBuilder.build();
 
 //			log.warn("Final Gateway Headers: {}", modifiedRequest.getHeaders());
