@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.cts.transport_gov.authentication_service.enums.UserStatus;
 import com.cts.transport_gov.authentication_service.model.User;
 import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
 import com.cts.transport_gov.authentication_service.respository.UserRepository;
@@ -39,20 +40,37 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		// 1. First, attempt to find the principal in the administrative/staff User
-		// table
-		Optional<User> user = userRepository.findByPhone(username);
-		if (user.isPresent()) {
-			// Database data is converted into UserDetails automatically because
-			// the User model implements UserDetails.
-			return user.get();
-		}
+	    // ✅ 1. Check USER table (staff)
+	    Optional<User> optionalUser = userRepository.findByPhone(username);
 
-		// 2. If not found in User, check the Citizen table
-		// This ensures both Citizens and Staff can log in through the same security
-		// filter.
-		return citizenRepository.findByPhone(username)
-				.orElseThrow(() -> new UsernameNotFoundException("Invalid phone number or password"));
+	    if (optionalUser.isPresent()) {
+
+	        User user = optionalUser.get();
+
+	        // ✅ ✅ APPLY STATUS CHECK ONLY FOR USERS
+	        if (user.getStatus() == UserStatus.PENDING) {
+	            throw new RuntimeException("User not approved by ADMIN");
+	        }
+
+	        if (user.getStatus() == UserStatus.SUSPENDED) {
+	            throw new RuntimeException("User account is suspended");
+	        }
+
+	        if (user.getStatus() == UserStatus.DELETED) {
+	            throw new RuntimeException("User account is deleted");
+	        }
+
+	        if (user.getStatus() == UserStatus.INACTIVE) {
+	            throw new RuntimeException("User account is inactive");
+	        }
+
+	        return user; 
+	    }
+
+	    // ✅ 2. Check CITIZEN table
+	    // 🔥 NO STATUS CHECK HERE → citizen login directly allowed
+	    return citizenRepository.findByPhone(username)
+	            .orElseThrow(() ->
+	                    new UsernameNotFoundException("Invalid phone number or password"));
 	}
-
 }

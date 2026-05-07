@@ -95,9 +95,19 @@ public class UserController {
 		return ResponseEntity.ok(userService.findByEmail(email));
 
 	}
+
 	@GetMapping("/logs")
-    public ResponseEntity<List<AuditLog>> getLogs(@RequestHeader("admin-id") Long adminId) {
-        log.info("Audit logs requested by admin ID: {}", adminId);
-        return ResponseEntity.ok(userService.getAllLogs(adminId));
-    }
+	public ResponseEntity<List<AuditLog>> getLogs(@RequestHeader("admin-id") Long adminId) {
+		log.info("Audit logs requested by admin ID: {}", adminId);
+		return ResponseEntity.ok(userService.getAllLogs(adminId));
+	}
+
+	@PutMapping("/{adminId}/approve/{userId}")
+	public ResponseEntity<String> approveUser(@PathVariable Long adminId, @PathVariable Long userId) {
+
+		log.info("Admin {} approving user {}", adminId, userId);
+
+		return ResponseEntity.ok(userService.approveUser(adminId, userId));
+	}
+
 }

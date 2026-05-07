@@ -106,8 +106,9 @@ public class User implements UserDetails {
 		return true;
 	}
 
+	
 	@Override
 	public boolean isEnabled() {
-		return this.status == UserStatus.ACTIVE; // Example logic
+	    return this.status == UserStatus.ACTIVE;
 	}
 }

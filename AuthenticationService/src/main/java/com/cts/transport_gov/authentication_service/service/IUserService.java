@@ -2,6 +2,8 @@ package com.cts.transport_gov.authentication_service.service;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
@@ -22,4 +24,5 @@ public interface IUserService {
 	UserResponse findById(Long id);
 
 	List<AuditLog> getAllLogs(Long adminId);
+	public String approveUser(Long adminId, Long userId);
 }

@@ -13,6 +13,7 @@ import com.cts.transport_gov.authentication_service.dto.OtpNotificationRequest;
 import com.cts.transport_gov.authentication_service.dto.UserCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.UserResponse;
 import com.cts.transport_gov.authentication_service.enums.UserRole;
+import com.cts.transport_gov.authentication_service.enums.UserStatus;
 import com.cts.transport_gov.authentication_service.exceptions.AuthenticationException;
 import com.cts.transport_gov.authentication_service.exceptions.InvalidDataException;
 import com.cts.transport_gov.authentication_service.model.AuditLog;
@@ -39,34 +40,50 @@ public class UserService implements IUserService {
 
 	// ✅ CORRECT injection
 	private final AuditLogService auditLogService;
-
 	@Override
 	public UserResponse save(UserCreateRequest requestDto) {
 
-	    // ✅ Check if user already exists
+	    // ✅ Check duplicate phone
 	    Optional<User> exists = userRepository.findByPhone(requestDto.getPhone());
 	    if (exists.isPresent() || citizenRepository.findByPhone(requestDto.getPhone()).isPresent()) {
 	        throw new AuthenticationException("User already exists");
 	    }
 
-	    // ✅ Validate role
-	    if (requestDto.getRole().equals(UserRole.CITIZEN_PASSENGER)) {
+	    // ✅ Block CITIZEN role here
+	    if (requestDto.getRole() == UserRole.CITIZEN_PASSENGER) {
 	        throw new InvalidDataException("Invalid user role! provide correct data");
 	    }
 
-	    // ✅ Map request to entity
+	    // ✅ Map entity
 	    User user = modelMapper.map(requestDto, User.class);
 
-	    // ✅ Encode user-provided password
+	    // ✅ Encode password
 	    user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 	    user.setRole(requestDto.getRole());
+
+	    // ✅ ✅ ✅ ADMIN LOGIC (IMPORTANT 🔥)
+	    if (requestDto.getRole() == UserRole.ADMINISTRATOR) {
+
+	        boolean adminExists = userRepository.existsByRole(UserRole.ADMINISTRATOR);
+
+	        if (adminExists) {
+	            // ❌ Reject second admin
+	            throw new RuntimeException(
+	                    "ADMINISTRATOR already exists. Cannot create second ADMIN.");
+	        }
+
+	        // ✅ First ADMIN → ACTIVE immediately
+	        user.setStatus(UserStatus.ACTIVE);
+
+	    } else {
+	        // ✅ All other roles → PENDING (need admin approval)
+	        user.setStatus(UserStatus.PENDING);
+	    }
 
 	    // ✅ Save user
 	    User savedUser = userRepository.save(user);
 
-	    log.info("User registered successfully with phone: {}", requestDto.getPhone());
-
-	    // ✅ AUDIT LOG
+	    // ✅ Audit Log
 	    auditLogService.logAction(
 	            savedUser.getUserId(),
 	            "REGISTER_USER",
@@ -74,6 +91,31 @@ public class UserService implements IUserService {
 	    );
 
 	    return modelMapper.map(savedUser, UserResponse.class);
+	}
+	@Override
+	@Transactional
+	public String approveUser(Long adminId, Long userId) {
+
+	    User admin = userRepository.findById(adminId)
+	            .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+	    if (admin.getRole() != UserRole.ADMINISTRATOR) {
+	        throw new RuntimeException("Access denied. Only ADMIN can approve users.");
+	    }
+
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    user.setStatus(UserStatus.ACTIVE);
+	    userRepository.save(user);
+
+	    auditLogService.logAction(
+	            adminId,
+	            "APPROVED_USER_" + userId,
+	            "IDENTITY"
+	    );
+
+	    return "User approved successfully";
 	}
 	@Override
 	public void updateUser(User user, Long userId) {
