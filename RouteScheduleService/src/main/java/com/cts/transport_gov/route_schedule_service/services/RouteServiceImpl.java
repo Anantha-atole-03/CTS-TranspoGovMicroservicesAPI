@@ -36,6 +36,7 @@ public class RouteServiceImpl implements IRouteService {
 		route.setStartPoint(request.getStartPoint());
 		route.setEndPoint(request.getEndPoint());
 		route.setStatus(request.getStatus());
+		route.setFares(request.getFares());
 
 		Route saved = routeRepository.save(route);
 		return toResponse(saved);
@@ -51,6 +52,7 @@ public class RouteServiceImpl implements IRouteService {
 		existing.setStartPoint(request.getStartPoint());
 		existing.setEndPoint(request.getEndPoint());
 		existing.setStatus(request.getStatus());
+		existing.setFares(request.getFares());
 
 		Route saved = routeRepository.save(existing);
 		return toResponse(saved);
@@ -89,6 +91,7 @@ public class RouteServiceImpl implements IRouteService {
 		response.setStartPoint(route.getStartPoint());
 		response.setEndPoint(route.getEndPoint());
 		response.setStatus(route.getStatus());
+		response.setFares(route.getFares());
 		return response;
 	}
 }

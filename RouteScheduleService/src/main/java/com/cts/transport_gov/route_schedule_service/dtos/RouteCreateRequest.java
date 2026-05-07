@@ -13,4 +13,5 @@ public class RouteCreateRequest {
   private String endPoint;
   private RouteStatus status;
   private String email;
+  private int fares;
 }
