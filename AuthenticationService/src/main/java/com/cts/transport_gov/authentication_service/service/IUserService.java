@@ -25,4 +25,5 @@ public interface IUserService {
 
 	List<AuditLog> getAllLogs(Long adminId);
 	public String approveUser(Long adminId, Long userId);
+	List<User>getAll();
 }

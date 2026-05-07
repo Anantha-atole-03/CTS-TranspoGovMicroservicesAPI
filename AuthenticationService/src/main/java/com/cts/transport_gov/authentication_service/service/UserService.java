@@ -182,4 +182,8 @@ public class UserService implements IUserService {
 		log.info("Log retrieval command executed successfully for Admin ID: {}", adminId);
 		return auditLogRepository.findAll();
 	}
+	@Override
+	public List<User> getAll() {
+		return userRepository.findAll();
+	}
 }

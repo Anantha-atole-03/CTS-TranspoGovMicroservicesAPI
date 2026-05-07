@@ -19,6 +19,7 @@ import com.cts.transport_gov.authentication_service.enums.UserRole;
 import com.cts.transport_gov.authentication_service.model.AuditLog;
 import com.cts.transport_gov.authentication_service.model.User;
 import com.cts.transport_gov.authentication_service.service.IUserService;
+import com.cts.transport_gov.authentication_service.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
 	private final IUserService userService;
+	private final UserService userService2;
 
 	/**
 	 * Registers a new user in the system. * @param user DTO containing the initial
@@ -110,4 +112,8 @@ public class UserController {
 		return ResponseEntity.ok(userService.approveUser(adminId, userId));
 	}
 
+	@GetMapping("/allUsers")
+	public List<User> FindAll() {
+		return userService2.getAll();
+	}
 }
