@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
 	private final IUserService userService;
-	private final UserService userService2;
+
 
 	/**
 	 * Registers a new user in the system. * @param user DTO containing the initial
@@ -104,16 +104,32 @@ public class UserController {
 		return ResponseEntity.ok(userService.getAllLogs(adminId));
 	}
 
-	@PutMapping("/{adminId}/approve/{userId}")
-	public ResponseEntity<String> approveUser(@PathVariable Long adminId, @PathVariable Long userId) {
-
-		log.info("Admin {} approving user {}", adminId, userId);
-
-		return ResponseEntity.ok(userService.approveUser(adminId, userId));
-	}
-
 	@GetMapping("/allUsers")
-	public List<User> FindAll() {
-		return userService2.getAll();
+	public ResponseEntity<List<User>> getAllUsers() {
+		log.info("All Users");
+		return ResponseEntity.ok(userService.getAll());
 	}
+
+	@PutMapping("/{adminId}/{status}/{userId}")
+	public ResponseEntity<String> approveUser(@PathVariable Long adminId, @PathVariable String status,
+			@PathVariable Long userId) {
+
+		log.info("Admin {} approving user {}", adminId, status, userId);
+
+		return ResponseEntity.ok(userService.approveUser(adminId, status, userId));
+	}
+
+//	@GetMapping("/allUsersA")
+//	public List<User> FindAllUsers() {
+//		return userService.getAll();
+//	}
+
+	@GetMapping("/pending")
+	public ResponseEntity<List<User>> getPendingUsers() {
+
+		log.info("Fetching all pending users");
+
+		return ResponseEntity.ok(userService.findByPending());
+	}
+
 }

@@ -94,19 +94,28 @@ public class UserService implements IUserService {
 	}
 	@Override
 	@Transactional
-	public String approveUser(Long adminId, Long userId) {
-
+	public String approveUser(Long adminId,String status, Long userId) {
+		log.info("1");
 	    User admin = userRepository.findById(adminId)
 	            .orElseThrow(() -> new RuntimeException("Admin not found"));
+		log.info("2");
 
 	    if (admin.getRole() != UserRole.ADMINISTRATOR) {
+			log.info("3");
 	        throw new RuntimeException("Access denied. Only ADMIN can approve users.");
 	    }
+		log.info("4");
 
 	    User user = userRepository.findById(userId)
 	            .orElseThrow(() -> new RuntimeException("User not found"));
+		log.info("5");
 
-	    user.setStatus(UserStatus.ACTIVE);
+	    if(status.equalsIgnoreCase("active"))
+	    	user.setStatus(UserStatus.ACTIVE);
+	    else
+	    	user.setStatus(UserStatus.REJECT);
+		log.info("6");
+
 	    userRepository.save(user);
 
 	    auditLogService.logAction(
@@ -185,5 +194,18 @@ public class UserService implements IUserService {
 	@Override
 	public List<User> getAll() {
 		return userRepository.findAll();
+	}
+	
+	@Override
+	public List<User> findByPending() {
+
+	    // ✅ Fetch users with PENDING status
+	    List<User> pendingUsers = userRepository.findByStatus(UserStatus.PENDING);
+
+	    if (pendingUsers.isEmpty()) {
+	        throw new RuntimeException("No pending users found");
+	    }
+
+	    return pendingUsers;
 	}
 }

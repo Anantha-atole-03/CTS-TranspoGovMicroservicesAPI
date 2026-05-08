@@ -52,7 +52,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	            throw new RuntimeException("User not approved by ADMIN");
 	        }
 
-	        if (user.getStatus() == UserStatus.SUSPENDED) {
+	        if (user.getStatus() == UserStatus.REJECT) {
 	            throw new RuntimeException("User account is suspended");
 	        }
 

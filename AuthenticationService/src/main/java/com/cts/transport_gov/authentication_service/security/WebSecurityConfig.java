@@ -83,6 +83,8 @@ public class WebSecurityConfig {
 						// -------- User --------
 						.requestMatchers("/users/**").hasRole("ADMINISTRATOR")
 						.requestMatchers(HttpMethod.GET,"/users/allUsers/**").hasRole("ADMINISTRATOR")
+						.requestMatchers(HttpMethod.GET,"/users/pending/**").hasRole("ADMINISTRATOR")
+						.requestMatchers(HttpMethod.GET,"/users/allUsers/**").hasRole("ADMINISTRATOR")
 						// All other requests must be authenticated
 						.anyRequest().authenticated())
 				// Adding our custom JWT filter before the standard
