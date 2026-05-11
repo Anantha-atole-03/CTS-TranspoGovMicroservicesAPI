@@ -8,6 +8,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -20,72 +23,53 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/citizen-documents")
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class CitizenDocumentController {
 
-    private final ICitizenDocumentService citizenDocumentService;
+	private final ICitizenDocumentService citizenDocumentService;
 
-    // ===================== MULTIPART FILE UPLOAD =====================
+	// ===================== MULTIPART FILE UPLOAD =====================
 
-//    @PostMapping(
-//        value = "/upload/{citizenId}",
-//        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public CitizenDocumentResponse uploadDocument(
-//            @PathVariable Long citizenId,
-//            @RequestParam("file") MultipartFile file,
-//            @RequestParam("docType") String docType,
-//            @RequestParam(
-//                value = "verificationStatus",
-//                defaultValue = "PENDING") String verificationStatus)
-//            throws IOException {
-//
-//        String uploadDir = "uploads";
-//        File dir = new File(uploadDir);
-//        if (!dir.exists()) dir.mkdirs();
-//
-//        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-//        Path filePath = Paths.get(uploadDir, fileName);
-//
-//        Files.write(filePath, file.getBytes());
-//
-//        CitizenDocumentCreateRequest request = new CitizenDocumentCreateRequest();
-//        request.setCitizenId(citizenId);
-//        request.setDocType(docType);
-//
-//        return citizenDocumentService
-//                .uploadDocument(request, filePath.toString(), verificationStatus);
-//    }
+	@PostMapping("/upload")
+	@PreAuthorize("hasRole('CITIZEN_PASSENGER')")
+	public ResponseEntity<CitizenDocumentResponse> uploadDocument(@RequestParam Long citizenId,
+			@RequestParam String docType, @RequestParam MultipartFile file) {
 
-    // ===================== JSON-ONLY (FRD) UPLOAD =====================
+		CitizenDocumentResponse response = citizenDocumentService.uploadDocument(citizenId, docType, file);
+		return ResponseEntity.ok(response);
 
-    @PostMapping("/upload-json")
-    public String uploadViaJson(@RequestBody DocumentUploadReq request) {
-        return citizenDocumentService.upload(request);
-    }
+	}
 
-    // ===================== GET =====================
+	// ===================== JSON-ONLY (FRD) UPLOAD =====================
 
-    @GetMapping("/{documentId}")
-    public CitizenDocumentResponse getDocument(@PathVariable Long documentId) {
-        return citizenDocumentService.getDocument(documentId);
-    }
+	@PostMapping("/upload-json")
+	public String uploadViaJson(@RequestBody DocumentUploadReq request) {
+		return citizenDocumentService.upload(request);
+	}
 
-    @GetMapping("/admin/citizens-documents/{adminId}")
-    public List<CitizenDocumentResponse> getAllCitizenDocs() {
+	// ===================== GET =====================
 
-        return citizenDocumentService.getAllCitizenDocuments();
-    }
-    @GetMapping("/citizen/{citizenId}")
-    public List<CitizenDocumentResponse> getByCitizen(
-            @PathVariable Long citizenId) {
-        return citizenDocumentService.getDocumentsByCitizen(citizenId);
-    }
+	@GetMapping("/{documentId}")
+	public CitizenDocumentResponse getDocument(@PathVariable Long documentId) {
+		return citizenDocumentService.getDocument(documentId);
+	}
 
-    // ===================== VERIFY =====================
+	@GetMapping("/admin/citizens-documents/{adminId}")
+	public List<CitizenDocumentResponse> getAllCitizenDocs() {
 
-    @PutMapping("/verify/{documentId}")
-    public CitizenDocumentResponse verify(
-            @PathVariable Long documentId,
-            @RequestBody CitizenDocumentVerifyRequest request) {
-        return citizenDocumentService.verifyDocument(documentId, request);
-    }
+		return citizenDocumentService.getAllCitizenDocuments();
+	}
+
+	@GetMapping("/citizen/{citizenId}")
+	public List<CitizenDocumentResponse> getByCitizen(@PathVariable Long citizenId) {
+		return citizenDocumentService.getDocumentsByCitizen(citizenId);
+	}
+
+	// ===================== VERIFY =====================
+
+	@PutMapping("/verify/{documentId}")
+	public CitizenDocumentResponse verify(@PathVariable Long documentId,
+			@RequestBody CitizenDocumentVerifyRequest request) {
+		return citizenDocumentService.verifyDocument(documentId, request);
+	}
 }

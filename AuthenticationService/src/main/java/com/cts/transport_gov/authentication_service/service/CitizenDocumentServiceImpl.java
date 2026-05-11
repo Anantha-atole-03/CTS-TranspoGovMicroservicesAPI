@@ -1,5 +1,11 @@
 package com.cts.transport_gov.authentication_service.service;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,7 +14,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cts.transport_gov.authentication_service.dto.CitizenDocumentCreateRequest;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentResponse;
 import com.cts.transport_gov.authentication_service.dto.CitizenDocumentVerifyRequest;
 import com.cts.transport_gov.authentication_service.dto.DocumentUploadReq;
@@ -19,111 +24,133 @@ import com.cts.transport_gov.authentication_service.model.CitizenDocument;
 import com.cts.transport_gov.authentication_service.respository.AuditLogRepository;
 import com.cts.transport_gov.authentication_service.respository.CitizenDocumentRepository;
 import com.cts.transport_gov.authentication_service.respository.CitizenRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CitizenDocumentServiceImpl implements ICitizenDocumentService {
 
-	private final CitizenDocumentRepository citizenDocumentRepository;
-	private final CitizenRepository citizenRepository;
-	private final AuditLogRepository auditLogRepository;
+    private final CitizenDocumentRepository citizenDocumentRepository;
+    private final CitizenRepository citizenRepository;
+    private final AuditLogRepository auditLogRepository;
 
-	// ===================== FILE UPLOAD FLOW =====================
+    // ✅ FILE UPLOAD (KEEP THIS ONLY)
+    @Override
+    @Transactional
+    public CitizenDocumentResponse uploadDocument(Long citizenId, String docType, MultipartFile file) {
 
-//	@Override
-//	@Transactional
-//	public CitizenDocumentResponse uploadDocument(CitizenDocumentCreateRequest request, String filePath,
-//			String verificationStatus) {
-//
-//		log.info("Uploading document for citizenId={}", request.getCitizenId());
-//
-//		Citizen citizen = citizenRepository.findById(request.getCitizenId())
-//				.orElseThrow(() -> new RuntimeException("Citizen not found"));
-//
-//		CitizenDocument document = CitizenDocument.builder().citizen(citizen).docType(request.getDocType())
-//				.fileURI(filePath).uploadedDate(LocalDate.now())
-//				.verificationStatus(DocumentVerificationStatus.valueOf(verificationStatus.toUpperCase())).build();
-//
-//		CitizenDocument saved = citizenDocumentRepository.save(document);
-//
-//		auditLogRepository.save(AuditLog.builder().userId(citizen.getCitizenId()).action("DOCUMENT_UPLOAD")
-//				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
-//
-//		return mapToResponse(saved);
-//	}
+        Citizen citizen = citizenRepository.findById(citizenId)
+                .orElseThrow(() -> new RuntimeException("Citizen not found"));
 
-	@Override
-	@Transactional
-	public String upload(DocumentUploadReq req) {
+        try {
+            String uploadDir = "uploads/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
 
-		log.info("Processing JSON document upload for citizenId={}", req != null ? req.getCitizenId() : "NULL");
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
 
-		if (req == null || req.getCitizenId() == null) {
-			throw new IllegalArgumentException("Request body or citizenId cannot be null");
-		}
+            Files.write(filePath, file.getBytes());
 
-		Citizen citizen = citizenRepository.findById(req.getCitizenId())
-				.orElseThrow(() -> new RuntimeException("Citizen not found"));
+            CitizenDocument document = CitizenDocument.builder()
+                    .citizen(citizen)
+                    .docType(docType)
+                    .fileURI(filePath.toString())
+                    .uploadedDate(LocalDate.now())
+                    .verificationStatus(DocumentVerificationStatus.PENDING)
+                    .build();
 
-		CitizenDocument doc = CitizenDocument.builder().citizen(citizen).docType(req.getDocType())
-				.fileURI(req.getFileUri()).uploadedDate(LocalDate.now())
-				.verificationStatus(DocumentVerificationStatus.PENDING).build();
+            CitizenDocument saved = citizenDocumentRepository.save(document);
 
-		citizenDocumentRepository.save(doc);
+            return mapToResponse(saved);
 
-		auditLogRepository.save(AuditLog.builder().userId(req.getCitizenId()).action("DOCUMENT_UPLOAD_JSON")
-				.resource("citizen_documents").timestamp(LocalDateTime.now()).build());
+        } catch (IOException e) {
+            throw new RuntimeException("File upload failed");
+        }
+    }
 
-		return "Document uploaded successfully for Citizen ID: " + req.getCitizenId();
-	} 
-	// ===================== VERIFY =====================
+    // ✅ JSON Upload (keep as is)
+    @Override
+    @Transactional
+    public String upload(DocumentUploadReq req) {
 
-	@Override
-	@Transactional
-	public CitizenDocumentResponse verifyDocument(Long documentId, CitizenDocumentVerifyRequest request) {
+        log.info("Processing JSON document upload for citizenId={}", req != null ? req.getCitizenId() : "NULL");
 
-		CitizenDocument document = citizenDocumentRepository.findById(documentId)
-				.orElseThrow(() -> new RuntimeException("Document not found"));
+        if (req == null || req.getCitizenId() == null) {
+            throw new IllegalArgumentException("Request body or citizenId cannot be null");
+        }
 
-		document.setVerificationStatus(request.getVerificationStatus());
-		return mapToResponse(citizenDocumentRepository.save(document));
-	}
+        Citizen citizen = citizenRepository.findById(req.getCitizenId())
+                .orElseThrow(() -> new RuntimeException("Citizen not found"));
 
-	// ===================== RETRIEVAL =====================
+        CitizenDocument doc = CitizenDocument.builder()
+                .citizen(citizen)
+                .docType(req.getDocType())
+                .fileURI(req.getFileUri())
+                .uploadedDate(LocalDate.now())
+                .verificationStatus(DocumentVerificationStatus.PENDING)
+                .build();
 
-	@Override
-	public CitizenDocumentResponse getDocument(Long documentId) {
-		return citizenDocumentRepository.findById(documentId).map(this::mapToResponse)
-				.orElseThrow(() -> new RuntimeException("Document not found"));
-	}
+        citizenDocumentRepository.save(doc);
 
-	@Override
-	public List<CitizenDocumentResponse> getDocumentsByCitizen(Long citizenId) {
-		return citizenDocumentRepository.findByCitizen_CitizenId(citizenId).stream().map(this::mapToResponse)
-				.collect(Collectors.toList());
-	}
+        auditLogRepository.save(AuditLog.builder()
+                .userId(req.getCitizenId())
+                .action("DOCUMENT_UPLOAD_JSON")
+                .resource("citizen_documents")
+                .timestamp(LocalDateTime.now())
+                .build());
 
-	@Override
-	public List<CitizenDocumentResponse> getAllCitizenDocuments() {
-		List<CitizenDocument> docs = citizenDocumentRepository.findAll();
+        return "Document uploaded successfully for Citizen ID: " + req.getCitizenId();
+    }
 
-		return docs.stream().map(this::mapToResponse).toList();
-	}
+    // ✅ VERIFY
+    @Override
+    @Transactional
+    public CitizenDocumentResponse verifyDocument(Long documentId, CitizenDocumentVerifyRequest request) {
 
-	// ===================== MAPPER =====================
+        CitizenDocument document = citizenDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
 
-	private CitizenDocumentResponse mapToResponse(CitizenDocument doc) {
-		CitizenDocumentResponse res = new CitizenDocumentResponse();
-		res.setDocumentId(doc.getDocumentId());
-		res.setCitizenId(doc.getCitizen().getCitizenId());
-		res.setDocType(doc.getDocType());
-		res.setFileURI(doc.getFileURI());
-		res.setUploadedDate(doc.getUploadedDate());
-		res.setVerificationStatus(doc.getVerificationStatus());
-		return res;
-	}
+        document.setVerificationStatus(request.getVerificationStatus());
+
+        return mapToResponse(citizenDocumentRepository.save(document));
+    }
+
+    // ✅ GET ONE
+    @Override
+    public CitizenDocumentResponse getDocument(Long documentId) {
+        return citizenDocumentRepository.findById(documentId)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+    }
+
+    // ✅ GET BY CITIZEN
+    @Override
+    public List<CitizenDocumentResponse> getDocumentsByCitizen(Long citizenId) {
+        return citizenDocumentRepository.findByCitizen_CitizenId(citizenId)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ GET ALL
+    @Override
+    public List<CitizenDocumentResponse> getAllCitizenDocuments() {
+        return citizenDocumentRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ✅ MAPPER (ONLY ONE)
+    private CitizenDocumentResponse mapToResponse(CitizenDocument doc) {
+        CitizenDocumentResponse res = new CitizenDocumentResponse();
+        res.setCitizenId(doc.getCitizen().getCitizenId());
+        res.setDocType(doc.getDocType());
+        res.setFileURI(doc.getFileURI());
+        res.setUploadedDate(doc.getUploadedDate());
+       res.setVerificationStatus(doc.getVerificationStatus());
+        return res;
+    }
 }
