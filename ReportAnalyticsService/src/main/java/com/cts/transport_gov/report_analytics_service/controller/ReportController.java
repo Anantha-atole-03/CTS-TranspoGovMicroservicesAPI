@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cts.transport_gov.report_analytics_service.dto.FullAnalyticsResponse;
 import com.cts.transport_gov.report_analytics_service.dto.ReportRequest;
 import com.cts.transport_gov.report_analytics_service.dto.ReportResponse;
 import com.cts.transport_gov.report_analytics_service.enums.ReportScope;
@@ -93,6 +94,14 @@ public class ReportController {
 				.status(ReportStatus.COMPLETED).generatedDate(report.getGeneratedDate()).build();
 
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/full-analytics/{programId}")
+	public ResponseEntity<FullAnalyticsResponse> getFullAnalytics(@PathVariable Long programId) {
+
+		log.info("Fetching full analytics dashboard");
+
+		return ResponseEntity.ok(reportService.getFullAnalytics(programId));
 	}
 
 }

@@ -5,10 +5,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.cts.transport_gov.report_analytics_service.dto.FullAnalyticsResponse;
+import com.cts.transport_gov.report_analytics_service.dto.ProgramUtilizationDTO;
 import com.cts.transport_gov.report_analytics_service.exception.ResourceNotFoundException;
 import com.cts.transport_gov.report_analytics_service.exception.ServiceUnavailableException;
 import com.cts.transport_gov.report_analytics_service.feign_client.ComplianceServiceClient;
 import com.cts.transport_gov.report_analytics_service.feign_client.ProgramServiceClient;
+import com.cts.transport_gov.report_analytics_service.feign_client.ResourceServiceClient;
 import com.cts.transport_gov.report_analytics_service.feign_client.RouteServiceClient;
 import com.cts.transport_gov.report_analytics_service.feign_client.TicketServiceClient;
 import com.cts.transport_gov.report_analytics_service.model.Report;
@@ -32,6 +35,7 @@ public class ReportService implements IReportService {
 	private final TicketServiceClient ticketServiceClient;
 	private final ProgramServiceClient programServiceClient;
 	private final ComplianceServiceClient complianceServiceClient;
+	private final ResourceServiceClient resourceServiceClient;
 
 	/*
 	 * Description: Generates the operational dashboard by aggregating key metrics
@@ -125,5 +129,58 @@ public class ReportService implements IReportService {
 		log.info("Fetching report jobId={}", jobId);
 		return reportRepo.findById(jobId)
 				.orElseThrow(() -> new ResourceNotFoundException("Report not found with id: " + jobId));
+	}
+
+	@Override
+	public FullAnalyticsResponse getFullAnalytics(Long programId) {
+		{
+
+			log.info("Fetching full analytics for programId={}", programId);
+
+			int activeRoutes = 0;
+			long totalTickets = 0;
+			int complianceAlerts = 0;
+
+			ProgramUtilizationDTO utilization;
+
+			try {
+				activeRoutes = routeServiceClient.countActiveRoutes();
+				totalTickets = ticketServiceClient.countTickets();
+				complianceAlerts = complianceServiceClient.getComplianceAlerts();
+
+				utilization = resourceServiceClient.getProgramUtilization(programId);
+
+// ✅ FIX: Add debug log (VERY IMPORTANT)
+				log.info("Utilization received from Resource Service: {}", utilization);
+
+				// ✅ FIX: Handle null response
+				if (utilization == null) {
+					log.error("Utilization is NULL for programId={}", programId);
+					throw new ServiceUnavailableException("Resource service returned NULL data");
+				}
+
+			} catch (FeignException ex) {
+				log.error("Dependency failure", ex);
+				throw new ServiceUnavailableException("Dependent service failed");
+			}
+
+			// ✅ DERIVED METRICS (REAL ANALYTICS)
+
+			double ticketPerRoute = activeRoutes == 0 ? 0 : (double) totalTickets / activeRoutes;
+
+			double resourceEfficiency = utilization.getTotalResourcesAllocated() == 0 ? 0
+					: (double) utilization.getTotalResourcesUsed() / utilization.getTotalResourcesAllocated() * 100;
+
+			double budgetEfficiency = utilization.getBudgetUtilizationPercentage();
+			return FullAnalyticsResponse.builder().activeRoutes(activeRoutes).totalTickets(totalTickets)
+					.complianceAlerts(complianceAlerts)
+
+					// ✅ ✅ ADD THIS LINE (IMPORTANT FIX)
+					.programUtilization(utilization)
+
+					.ticketPerRoute(ticketPerRoute).resourceEfficiency(resourceEfficiency)
+					.budgetEfficiency(budgetEfficiency).build();
+		}
+
 	}
 }

@@ -3,11 +3,10 @@ package com.cts.transport_gov.report_analytics_service.feign_client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@FeignClient(name = "ProgramResourceService", fallback = ProgramServiceFallback.class)
-
+@FeignClient(name = "ProgramResourceService", contextId = "programClient", // ✅ ADD THIS
+		fallback = ProgramServiceFallback.class)
 public interface ProgramServiceClient {
 
 	@GetMapping("/programs/count")
 	double calculateEfficiency();
-
 }

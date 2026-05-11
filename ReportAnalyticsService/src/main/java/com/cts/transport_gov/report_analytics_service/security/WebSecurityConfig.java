@@ -55,6 +55,9 @@ public class WebSecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/report/custom/jobs/**")
 						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, COMPLIANCE_OFFICER, GOVERNMENT_AUDITOR)
 
+						.requestMatchers(HttpMethod.GET, "/report/full-analytics/**")
+						.hasAnyRole(PROGRAM_MANAGER, ADMINISTRATOR, GOVERNMENT_AUDITOR)
+
 						// All other requests must be authenticated
 						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

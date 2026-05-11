@@ -1,11 +1,9 @@
 package com.cts.transport_gov.report_analytics_service.service;
 
-
 import java.util.Map;
 
+import com.cts.transport_gov.report_analytics_service.dto.FullAnalyticsResponse;
 import com.cts.transport_gov.report_analytics_service.model.Report;
-
-
 
 public interface IReportService {
 
@@ -14,5 +12,6 @@ public interface IReportService {
 	Report runCustomReport(String scope);
 
 	Report getReportByJobId(Long jobId);
-}
 
+	FullAnalyticsResponse getFullAnalytics(Long programId);
+}
